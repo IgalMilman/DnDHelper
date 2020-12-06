@@ -1,0 +1,18 @@
+ {% extends "_base.html" %} {% load static %} {% block bodysec %}
+<div class="row">
+    <div class="columns align-center small-0 medium-1 large-2">
+    </div>
+    <div class="columns align-center small-12 medium-10 large-8 container-padded">
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+        {% block body %} {% endblock %}
+    </div>
+    <div class="columns align-center small-0 medium-1 large-2 container-padded">
+    </div>
+</div>
+{% endblock %}

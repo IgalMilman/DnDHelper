@@ -1,0 +1,13 @@
+{% extends "_basenarrow.html" %} {% load static %} {% block extra_css %}{% endblock %} {% block body %} {% csrf_token %}
+<h2>Welcome to the {{ SOFTWARE_NAME }}</h2><br>
+{% for item in main_items %}
+{% if item.accessible %}
+<div class="row text-center">
+    <div class="columns"></div>
+    <div class="columns small-8 medium-6 large-4"> <a href="{{ item.link }}" class="button round centered-block-element">{{ item.label }}</a>
+    </div>
+    <div class="columns"></div>
+</div><br>
+{% endif %}
+{% endfor %}
+ {% endblock %}

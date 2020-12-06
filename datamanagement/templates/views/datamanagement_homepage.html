@@ -1,0 +1,15 @@
+{% extends "_basenarrow.html" %} {% load static %} {% block extra_css %}{% endblock %} {% block body %} {% csrf_token %}
+<h2>Welcome to the {{ SOFTWARE_NAME }}</h2><br>
+<div class="row text-center">
+    <div class="columns"></div>
+    <div class="columns small-8 medium-6 large-4"> <a href="{% url 'datamanagement_export' %}" class="button round centered-block-element">Export Data</a>
+    </div>
+    <div class="columns"></div>
+</div><br>
+<div class="row text-center">
+    <div class="columns"></div>
+    <div class="columns small-8 medium-6 large-4"> <a href="{% url 'datamanagement_import' %}" class="button round centered-block-element">Import Data</a>
+    </div>
+    <div class="columns"></div>
+</div>
+ {% endblock %}

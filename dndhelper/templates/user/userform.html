@@ -1,0 +1,20 @@
+{% extends "_basenarrow.html" %} {% load static %} {% block extra_css %}{% endblock %}
+{% block extra_javascript %}
+<script src="{% static 'js/base/dialogs.js' %}"></script>
+{% endblock %} {% block body %}
+<h2>{{ minititle }}</h2>
+<form method="POST" class="post-form" autocomplete="off"> {{ form.as_p }}{% csrf_token %}
+    <input type="hidden" name="targetid" value="{{ targetid|default:'-1' }}">
+    <input type="hidden" name="action" value="{{ action|default:'add' }}">
+    <button type="submit" class="button save round">{{ submbutton }}</button>
+    <a href="{{ backurl }}" class="button round">Cancel</a>
+</form>
+{% if targetid %}
+<form method="POST" class="post-form" autocomplete="off"> {% csrf_token %}
+    <input type="hidden" name="targetid" value="{{ targetid|default:'-1' }}">
+    <input type="hidden" name="action" value="delete">
+    <button type="button" class="alert button round" onclick="confirmDial('{{ deletebutton }}', 'Are you sure you want to delete?', function(par) {par.submit()}, this.parentElement); return false">{{ deletebutton }}</button>
+</form>
+{% else %}
+{% endif %}
+{% endblock %}

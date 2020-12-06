@@ -1,0 +1,23 @@
+<div id='wikisection-id-{{ section.unid }}' class='section-bordered'>
+    <div class="row">
+        <div class="columns text-left"><h4><a id='{{ section.anchor_id }}'></a>{{ section.title }}</h4></div>
+        <div class="columns text-right"></div>
+        <div class="columns text-right"><i>
+            <a href="#{{ wiki_page.anchor_id }}">Top &uarr;</a>
+            </i>
+    {% if section.editable %}
+    <form action="{% url 'wiki_page' wikipageuuid=wiki_page.unid %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change">
+            <input type="hidden" name="targetid" value="{{ section.unid }}">
+            <a id="wikisection-id-change-{{ section.unid }}" class="button round inlineblock" onclick="this.parentElement.submit();">Edit section</a>
+    </form>{% endif %}
+        {% if section.permissionsable %}
+            <a id="wikisection-id-change-permission-{{ section.unid }}" class="button round inlineblock" onclick="var p = new PermissionPopup('{% url 'wiki_page_perm' wikipageuuid=wiki_page.unid %}', '{{ section.unid }}');p.Activate();">Change Permissions</a>
+    {% endif %}</div>
+    </div>
+    {% include "forms/widget/maybequill.html" with obj=section %}<br>
+    {% comment %} {% if comment.files %}
+    {% for onefile in comment.files.all %} {% include "views/components/oneuploadedfile.html" with onefile=onefile %} {% endfor %}
+    {% endif %} {% endcomment %}
+</div>

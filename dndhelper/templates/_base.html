@@ -1,0 +1,130 @@
+{% load static %}
+{% load tz %} {% timezone "America/New_York" %}
+<!DOCTYPE html>
+<html class="no-js" lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <!-- Set the viewport width to device width for mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/base/favicon.ico' %}{{ URL_ADD_TO_STATIC_FILES }}" />
+    <title>{% block page_title %}{{ PAGE_TITLE }}{% endblock %}</title>
+
+    <!-- Included base CSS Files -->
+    <link rel="stylesheet" href="{% static 'css/foundation/foundation.css' %}{{ URL_ADD_TO_STATIC_FILES }}">
+    <link rel="stylesheet" href="{% static 'css/foundation/foundation-icons/foundation-icons.css' %}{{ URL_ADD_TO_STATIC_FILES }}">
+    <link rel="stylesheet" href="{% static 'css/base/main.css' %}{{ URL_ADD_TO_STATIC_FILES }}">
+    {% if needdatatables %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/zf/dt-1.10.18/datatables.min.css"/>
+    {% endif %}
+    {% if needquillinput %}
+    <link rel="stylesheet" href="{% static 'css/quill/quill.core.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
+    <link rel="stylesheet" href="{% static 'css/quill/quill.snow.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
+    <link rel="stylesheet" href="{% static 'css/quill/quill.snow.div.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
+    <link rel="stylesheet" href="{% static 'css/quill/quill.addition.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
+    {% endif %}
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+
+    <style>
+
+    </style>
+
+    <!-- Main bar -->
+
+
+    <!-- End Header and Nav -->
+    <script>
+        var my_crsf_token = '{{ csrf_token }}'
+    </script>
+    <script src="{% static 'js/foundation/vendor/jquery.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+    <script src="{% static 'js/base/uuid.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+    <script src="{% static 'js/foundation/vendor/foundation.min.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+    {% if needdatatables %}
+    <script type="text/javascript" src="https://cdn.datatables.net/v/zf/dt-1.10.18/datatables.min.js"></script>
+    {% endif %}
+    {% if needquillinput %}
+    <script src="{% static 'js/quill/quill.min.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+    {% endif %}
+    {% block extra_css %}{% endblock %}{% block extra_javascript %}{% endblock %}
+</head>
+
+<body>
+    <div class='wrapper'>
+        <header>
+            <div class="row align-middle">
+                <div class="small-3 medium-4 large-3 columns">
+                    {% block logo %}<img src="{% static 'img/base/logo.png' %}{{ URL_ADD_TO_STATIC_FILES }}" alt='{{ LOGO_ALT_NAME }}' class='logo'>{% endblock %}
+                </div>
+
+                <div class="small-6 medium-4 large-6">
+                    {% if user.is_authenticated %}
+                    <div class="top-bar">
+                        <div class="top-bar-left">
+                            <ul class="vertical medium-horizontal menu"  data-responsive-menu="drilldown medium-dropdown">
+                            {% for item in MENU_ITEMS %}
+                            {% if item.accessible %}<li><a href="{{ item.link }}">{{ item.label }}</a></li>{% endif %}
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="top-bar">
+                        <div class="top-bar-left">
+                            <ul class="vertical medium-horizontal menu"  data-responsive-menu="drilldown medium-dropdown">
+                            {% for item in MENU_ITEMS %}
+                            {% if item.accessible %}<li><a href="{{ item.link }}">{{ item.label }}</a></li>{% endif %}
+                            {% endfor %}
+                            {% comment %} <li><a href="{% url ''%}"></a></li>
+                            <li><a href="{% url 'wiki_homepage'%}">Wiki</a></li>
+                            <li><a href="{% url 'datamanagement_homepage'%}">Data</a></li> {% endcomment %}
+                            {% comment %} <li><a href="{% url ''%}"></a></li> {% endcomment %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="small-3 medium-4 large-3 columns text-right">
+                    {%block welcomeusername%}{% if user.is_authenticated %} Welcome, {{ user.get_short_name }}. <a href="{% url 'personal_page' %}">Personal page</a><br><a class='alert' href="{% url 'logout' %}">Log out</a>{% else %}<a href="{% url 'login' %}">Login page</a>{% endif %}{% endblock%}
+                </div>
+            </div>
+            <div class="row">
+                <div class="large-12 columns">
+                    <hr>
+                </div>
+            </div>
+        </header>
+
+        <!-- sub-title and bread-crumbs -->
+        <!-- End sub-title and bread-crumbs -->
+
+        {% block bodysec %} {% endblock %}
+
+        <!-- Footer -->
+        <div class="push"></div>
+    </div>
+    <footer class="footer">
+        <div class="row">
+            <div class="cell small-12">
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="cell small-0 medium-2 large-3"></div>
+            <div class="cell small-12 medium-8 large-6">
+                {% block helptext %}
+                <div class="text-center">If you have any question, please contact support at <a href='mailto:{{ SUPPORT_EMAIL }}'>{{ SUPPORT_EMAIL }}</a></div> {% endblock %} {% block bottom_copy %}{% endblock %}
+            </div>
+            <div class="cell small-0 medium-2 large-3"></div>
+        </div>
+    </footer>
+
+    <script>
+        $(document).foundation();
+    </script>
+
+</body>
+
+</html>
+{% endtimezone %}
