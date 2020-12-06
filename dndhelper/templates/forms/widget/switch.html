@@ -1,0 +1,4 @@
+<p><label>{{widget.label_text}}</label><div class="switch small">
+    <input class="switch-input" type="checkbox" name="{{ widget.name }}" {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+    <label class="switch-paddle rounded" for="{{ widget.attrs.id }}"><span class="show-for-sr"></span></label>
+</div></p>

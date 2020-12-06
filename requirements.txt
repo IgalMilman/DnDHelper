@@ -1,0 +1,9 @@
+django
+mod-wsgi
+django-crum
+mock
+dateutil
+mysql-connector-python
+mysqlclient
+sqlparse
+pytz

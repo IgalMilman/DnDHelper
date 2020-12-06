@@ -1,0 +1,164 @@
+{% extends "_basenarrow.html" %} {% load static %} {% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet">
+
+<style>
+    form {
+        .form-icons {
+            text-align: center;
+            h4 {
+                margin-bottom: 1rem;
+            }
+            .input-group-label {
+                background-color: $primary-color;
+                border-color: $primary-color;
+            }
+            .input-group-field {
+                border-color: $primary-color;
+            }
+            .fa {
+                color: white;
+                width: 1rem;
+            }
+        }
+    }
+    
+    label {
+        display: block;
+        margin: 0 0 16px 0;
+    }
+</style>{% endblock %}{% block extra_javascript %}
+<script src="{% static 'js/base/ajax.js' %}"></script>
+<script>
+    function checkField(inputelement, errorelement, async = true) {
+        sendPostAjax("{% url 'changeuser' %}", {
+            'action': 'validate',
+            'target': inputelement.id,
+            'value': inputelement.value,
+            'curusername': '{{ username }}'
+        }, function(data) {
+            if (data['success'])
+                errorelement.classList.remove('is-visible');
+            else {
+                //inputelement.focus();
+                errorelement.classList.add('is-visible');
+                errorelement.innerHTML = data['message'];
+                document.usernameformvalid = false;
+            }
+        }, function(data) {
+            // inputelement.focus();
+            errorelement.classList.add('is-visible');
+            errorelement.innerHTML = data['message'];
+            document.usernameformvalid = false;
+        }, async = async)
+    }
+
+    function confirmPassword(confirmpasswordelement, passwordelelemnt, errorelement) {
+        if (passwordelelemnt.value != confirmpasswordelement.value) {
+            errorelement.classList.add('is-visible');
+            errorelement.innerText = 'Passwords must match!';
+            document.usernameformvalid = false;
+        } else
+            errorelement.classList.remove('is-visible');
+    }
+
+    function validateFormPassword() {
+        document.usernameformvalid = true;
+        checkField(document.getElementById('password'), document.getElementById('passworderror'), false);
+        return (document.usernameformvalid);
+    }
+
+    function validateFormName() {
+        return (document.getElementById('firstname').value != '') && (document.getElementById('lastname').value != '');
+    }
+
+    function validateFormEmail() {
+        document.usernameformvalid = true;
+        checkField(document.getElementById('email'), document.getElementById('emailerror'), false);
+        return document.usernameformvalid;
+    }
+</script>{% endblock %} {% block body %}
+<h4 class="text-center">Create a new user</h4>
+<div class="row align-self-middle text-center">
+    <div class="columns small-12">
+        <div class="row align-middle" data-equalizer>
+            <div class="columns small-4 text-right" data-equalizer-watch>
+                Username:</div>
+            <div class="columns small-8 text-left">
+                {{ username }}
+            </div>
+        </div><br>
+        <form action="{% url 'changeuser' %}" method="POST" enctype='multipart/form-data' class="text-center" onsubmit="return validateFormEmail()">
+            {% csrf_token %}
+            <input type='hidden' name='action' value='changeemail'> {% if changeid %} <input type='hidden' name='id' value='{{ changeid }}'> {% endif %}
+            <input type='hidden' name='curusername' value='{{ username }}'>
+            <div class="row align-middle" data-equalizer>
+                <div class="columns small-4 text-right" data-equalizer-watch><label for='email'>
+                    E-mail*:</label></div>
+                <div class="columns small-8">
+                    <span class="form-error" id="emailerror"></span>
+                    <input id="email" name="email" type="email" value="{{ email }}" placeholder="test@example.com" onblur="checkField(this, document.getElementById('emailerror'));" required>
+                </div>
+            </div>
+            <div class="row align-middle" data-equalizer>
+                <div class="columns small-12 text-center" data-equalizer-watch>
+                    <button class="button round centered-block-element">Change email</button>
+                </div>
+            </div>
+        </form><br>
+        <form action="{% url 'changeuser' %}" method="POST" enctype='multipart/form-data' class="text-center" onsubmit="return validateFormName()">
+            {% csrf_token %}
+            <input type='hidden' name='action' value='changename'> {% if changeid %} <input type='hidden' name='id' value='{{ changeid }}'> {% endif %}
+            <input type='hidden' name='curusername' value='{{ username }}'>
+            <div class="row align-middle" data-equalizer>
+                <div class="columns small-4 text-right" data-equalizer-watch><label for='firstname'>
+            First name*:</label></div>
+                <div class="columns small-8">
+                    <input id="firstname" name="firstname" type="text" value="{{ firstname }}" placeholder="firstname" required>
+                </div>
+            </div>
+            <div class="row align-middle" data-equalizer>
+                <div class="columns small-4 text-right" data-equalizer-watch><label for='lastname'>
+            Last name*:</label></div>
+                <div class="columns small-8">
+                    <input id="lastname" name="lastname" type="text" value="{{ lastname }}" placeholder="lastname" required>
+                </div>
+            </div>
+            <div class="row align-middle" data-equalizer>
+                <div class="columns small-12" data-equalizer-watch>
+                    <button class="button round centered-block-element">Change name</button>
+                </div>
+            </div>
+        </form><br>
+        <form action="{% url 'changeuser' %}" method="POST" enctype='multipart/form-data' class="text-center" onsubmit="return validateFormPassword()">
+            {% csrf_token %}
+            <input type='hidden' name='action' value='changepassword'> {% if changeid %} <input type='hidden' name='id' value='{{ changeid }}'> {% endif %}
+            <input type='hidden' name='curusername' value='{{ username }}'>
+            <div class="row align-middle" data-equalizer>
+                <div class="columns small-4 text-right" data-equalizer-watch><label for='password'>
+                Password*:</label></div>
+                <div class="columns small-8">
+                    <span class="form-error" id="passworderror"></span>
+                    <input id="password" name="password" type="password" value="" placeholder="Password" onblur="checkField(this, document.getElementById('passworderror'));" required>
+                </div>
+            </div>
+            <div class="row align-middle" data-equalizer>
+                <div class="columns small-4 text-right" data-equalizer-watch><label for='cpassword'>
+                Confirm password*:</label></div>
+                <div class="columns small-8">
+                    <span class="form-error" id="confirmpassworderror"></span>
+                    <input id="cpassword" name="cpassword" type="password" value="" placeholder="Confirm password" onblur="confirmPassword(this, document.getElementById('password'), document.getElementById('confirmpassworderror'));" required>
+                </div>
+            </div>
+            <div class="row align-middle" data-equalizer>
+                <div class="columns small-12" data-equalizer-watch>
+                    <button class="button round centered-block-element">Change password</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% if creationfailed %}
+<script>
+    validateForm()
+</script>
+{% endif %} {% endblock %}

@@ -1,0 +1,79 @@
+{% extends "_basewide.html" %}{% load static %} {% block extra_css %}{% endblock %}{% block extra_javascript %}
+<script src="{% static 'js/base/ajax.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'js/permissions.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'js/base/dialogs.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+{% endblock %}
+{% block body %}
+<div class="post-bordered">
+<div class="row">
+    <div class="columns text-left"><a id="{{ wiki_page.anchor_id }}"></a><h3>{{ wiki_page.title }}</h3>
+    {% include "forms/widget/maybequill.html" with obj=wiki_page %}
+<br>
+<ol>
+{% for section in wiki_page_sections %} 
+<a href='#{{ section.anchor_id }}'><li>{{ section.title }}</li></a>
+{% endfor %}
+</ol>
+</div>
+    {% if wiki_page.editable  %}<div class="columns text-left"></div>
+    <div class="columns text-right"><b>Created on:</b> {{ wiki_page.createtime|date:"Y-m-d h:i a" }}<br>
+    <b>Updated on:</b> {{ wiki_page.updatetime|date:"Y-m-d h:i a" }}<br>
+<b>Created by:</b> {{ wiki_page.createuser }}<br>
+<b>Updated by:</b> {{ wiki_page.updateuser }}
+    <form action="{% url 'wiki_new_page' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change">
+            <input type="hidden" name="targetid" value="{{ wiki_page.unid }}">
+            <a id="wiki-page-id-change-{{ wiki_page.unid }}" class="button round inlineblock" onclick="this.parentElement.submit();">Edit Page</a>
+    </form>
+    <a id="wikipage-id-change-permission-{{ wiki_page.unid }}" class="button round inlineblock" href="{% url 'wiki_page_export' wikipageuuid=wiki_page.unid %}">Export this page</a><br>
+{% if wiki_page.permissionsable %}
+        <a id="wikipage-id-change-permission-{{ wiki_page.unid }}" class="button round inlineblock" onclick="var p = new PermissionPopup('{% url 'wiki_page_perm' wikipageuuid=wiki_page.unid %}');p.Activate();">Change Permissions</a>
+{% endif %}</div>{% else %} 
+    {% if wiki_page.permissionsable %}
+        <div class="columns text-right"><a id="wikipage-id-change-permission-{{ wiki_page.unid }}" class="button round inlineblock" onclick="var p = new PermissionPopup('{% url 'wiki_page_perm' wikipageuuid=wiki_page.unid %}');p.Activate();">Change Permissions</a></div>
+{% endif %}{% endif %}
+</div>
+{% for section in wiki_page_sections %} 
+
+{% if edittargetsection == section %}
+{% if section.editable %}
+<form action="{% url 'wiki_page_add_section' wikipageuuid=wiki_page.unid %}" method="POST" class="post-form" autocomplete="off" enctype="multipart/form-data"> 
+{{ form.as_p }}{% csrf_token %}
+    <input type="hidden" name="targetid" value="{{ targetid|default:'-1' }}">
+    <input type="hidden" name="action" value="{{ action|default:'add' }}">
+    <button type="submit" class="button save round">{{ submbutton }}</button>
+    <a href="{{ backurl }}" class="button round">Cancel</a>
+</form>
+{% if deletebutton %}
+{% if targetid %}
+<form action="{% url 'wiki_page_add_section' wikipageuuid=wiki_page.unid %}" method="POST" class="post-form" autocomplete="off" enctype="multipart/form-data"> {% csrf_token %}
+    <input type="hidden" name="targetid" value="{{ targetid|default:'-1' }}">
+    <input type="hidden" name="action" value="delete">
+    <button type="button" class="alert button round" onclick="confirmDial('{{ deletebutton }}', 'Are you sure you want to delete?', function(par) {par.submit()}, this.parentElement); return false">{{ deletebutton }}</button>
+</form>
+{% endif %}
+{% endif %}
+{% else %}
+{% include "views/components/wiki_pagesection.html" with section=section %}
+{% endif %}
+{% else %}
+{% include "views/components/wiki_pagesection.html" with section=section %} 
+{% endif %}
+
+{% endfor %}
+{% if wiki_page.editable  %}
+{% if edittargetsection is None %}
+<div class="row">
+<div class="column"><hr></div>
+</div>
+<div class="row">
+<div class="column"><form action="{% url 'wiki_page_add_section' wikipageuuid=wiki_page.unid %}" method="POST" class="post-form" autocomplete="off" enctype="multipart/form-data"> {{ form.as_p }}{% csrf_token %}
+    <input type="hidden" name="action" value="{{ action|default:'add' }}">
+    <button type="submit" class="button save round">{{ submbutton }}</button>
+</form></div>
+</div>
+{% endif %}
+{% endif %}
+</div>
+{% endblock %}

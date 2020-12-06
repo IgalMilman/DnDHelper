@@ -1,0 +1,37 @@
+{% extends "_basenarrow.html" %} {% load static %} {% block extra_css %}{% endblock %}{% block extra_javascript %} {% endblock %} {% block body %}
+<h2>Wiki</h2>
+<table id='wikiart'>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Update date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for article in wiki_pages %} {% include "views/oneitemrow/wikirow.html" with wikip=article %} {% endfor %}
+    </tbody>
+</table>
+
+<div class="row align-middle" data-equalizer>
+    <div class='columns'></div>
+    <div class="columns small-9 middle-7 large-5 text-middle" data-equalizer-watch>
+        <a href="{% url 'wiki_new_page' %}" class="button round centered-block-element">Create new article</a><br>
+        <a href="{% url 'wiki_import' %}" class="button round centered-block-element">Import an article</a>
+    </div>
+    <div class='columns'></div>
+</div>
+
+{% if needdatatables %}
+<script>
+    $(document).ready(function() {
+        $('#wikiart').DataTable({
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+            "iDisplayLength": 25,
+            "bSort" : true,
+            "order": []
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

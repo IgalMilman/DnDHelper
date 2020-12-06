@@ -1,0 +1,5 @@
+{% if obj.is_quill_content %}
+{% include "forms/widget/maybequilltext.html" with text=obj.get_quill_content %}
+{% else %}
+<p>{{ obj.get_content|linebreaksbr }}</p>
+{% endif %}

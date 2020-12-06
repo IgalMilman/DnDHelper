@@ -1,0 +1,41 @@
+<div id="{{ widget.attrs.id }}">
+</div>
+<input type="hidden" name="{{ widget.name }}" id="{{ widget.attrs.id }}-input">
+<script>
+    var quill = new Quill('#{{ widget.attrs.id }}', {
+  modules: {
+    toolbar:
+    [
+      ['bold', 'italic', 'underline'],
+      ['link', 'blockquote', 'code-block'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      {% if widget.toolbar.image %}['image'],{% endif %}
+      {% if widget.toolbar.video %}['video'],{% endif %}
+      ['clean']
+    ]
+  },
+  {% if widget.placeholder %}placeholder: '{{ widget.placeholder }}',{% endif %}
+  {% if widget.theme %}theme: '{{ widget.theme }}',{% endif %}
+});
+    {% if widget.value %}
+      {% if widget.quill_object.is_quill_content %}
+        try{
+            quill.setContents({{ widget.quill_object.get_quill_value|safe }});
+        }catch{
+            try{
+                quill.setText("{{ widget.quill_object.get_content }}");
+            }catch{
+                
+            }
+        }
+      {% else %}
+        quill.setText("{{ widget.quill_object.get_content_js }}");
+      {% endif %}
+    {% endif %}
+    var quillinput = document.getElementById("{{ widget.attrs.id }}-input");
+    var form = quillinput.form;
+    form.onsubmit = function() {
+        var quillinput = document.getElementById("{{ widget.attrs.id }}-input");
+        quillinput.value = JSON.stringify(quill.getContents());
+    }
+</script>
