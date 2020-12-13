@@ -8,22 +8,22 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from dndhelper import views as main_views
-from dndhelper.widget import quill
+from dndhelper.widget import form_switch, quill
 
 from wiki import wikipage, wikisection
 
 
 class WikiSectionForm(forms.ModelForm):
     text = quill.QuillField(label='Text', widget=quill.QuillWidget({'toolbar': {'image': True, 'video': True}}))
+    commonknowledge = form_switch.SwitchOnOffField(label="Is public knowledge?", required=False)
     #file_field = forms.FileField(label="Attach files", widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
     
 
     class Meta:
         model = wikisection.WikiSection
-        fields = ('title', 'pageorder', 'text', )
+        fields = ('title', 'pageorder', 'commonknowledge', 'text', )
 
     def save(self, commit=True):
-        # TODO Download files from the Quil instead of writting them to the DB
         wikis = super(WikiSectionForm, self).save(commit=False)
         return wikis
 
@@ -113,6 +113,7 @@ def WikiSectionFormCreate(request, curpage):
         if not curpage.editable(request.user):
             return None
         form = WikiSectionForm()
+        form.fields['commonknowledge'].initial = curpage.commonknowledge
         data['action']='add'
         data['PAGE_TITLE'] = 'Add section: ' + settings.SOFTWARE_NAME_SHORT
         data['minititle'] = 'Add Section'

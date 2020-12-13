@@ -83,10 +83,7 @@ class WikiSectionTestCase(TestCase):
         self.assertTrue(self.wikisection1.is_quill_content())
 
     def test_wiki_section_is_quil_content_false(self):
-        self.assertFalse(self.wikisection2.is_quill_content())
-
-    def test_wiki_section_get_content(self):
-        self.assertEqual(self.wikisection2.get_content(), self.wikistext)
+        self.assertTrue(self.wikisection2.is_quill_content())
 
     def test_wiki_section_get_quill_content(self):
         self.assertEqual(self.wikisection1.get_quill_content(), quill.get_quill_text(self.wikisqtext))

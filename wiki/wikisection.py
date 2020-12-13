@@ -29,6 +29,7 @@ class WikiSection(models.Model):
     createdby = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="Created by", null=True, blank=True, related_name='createdwikisections')
     updatedby = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="Updated by", null=True, blank=True, related_name='lastupdatedwikisections')
     wikipage = models.ForeignKey(WikiPage, on_delete=models.CASCADE, null=False, blank=False)
+    commonknowledge = models.BooleanField("Is common knowledge?", default=False)
     pageorder = models.IntegerField("Order*", null=False, blank=False)
     title = models.CharField("Title*", max_length=160, null=False, blank=False)
     text = models.TextField("Description of the issue", null=True, blank=True)
@@ -96,7 +97,7 @@ class WikiSection(models.Model):
         if user.is_superuser:
             return True
         try:
-            if self.wikipage.commonknowledge:
+            if self.commonknowledge:
                 return True
             permissionlevel = self.permissions.get(grantedto=user)
             if permissionlevel is None:
@@ -162,6 +163,7 @@ class WikiSection(models.Model):
         'updatedon': self.updatedon.isoformat(),
         'updatedby': self.updatedby.get_username() if self.updatedby is not None else None,
         'pageorder': self.pageorder,
+        'commonknowledge': self.commonknowledge,
         'title': self.title,
         'text': quill.load_images_from_quill(json.loads(self.text) if self.is_quill_content() else quill.quillify_text(self.text), self.get_files_folder()),
         'perm': self.permission_list() 
@@ -220,6 +222,11 @@ class WikiSection(models.Model):
         if 'title' in jsonobject:
             try:
                 result.title = str(jsonobject['title'])
+            except Exception:
+                pass
+        if 'commonknowledge' in jsonobject:
+            try:
+                result.commonknowledge = bool(jsonobject['commonknowledge'])
             except Exception:
                 pass
         if 'text' in jsonobject:

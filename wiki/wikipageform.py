@@ -1,12 +1,15 @@
-from django import forms
-from dndhelper import views as main_views
-from django.urls import reverse
-from django.shortcuts import render, redirect
 from datetime import datetime
-from wiki import wikipage
-from dndhelper import settings
-from dndhelper.widget import quill, form_switch
+
 import pytz
+from django import forms
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from dndhelper import settings
+from dndhelper import views as main_views
+from dndhelper.widget import form_switch, quill
+
+from wiki import wikipage
+
 
 class WikiPageForm(forms.ModelForm):
     text = quill.QuillField(label="Article text", widget=quill.QuillWidget({'toolbar': {'image': True, 'video': True}}), required=False)

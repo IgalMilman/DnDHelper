@@ -56,6 +56,15 @@ class WikiModelGettersTestCase(TestCase):
         self.assertEqual(result['wiki_page'], self.wikiPages[0])
         self.assertListEqual(list(result['wiki_page_sections']), self.wikiSections)
     
+    def test_form_get_one_wiki_page_data_success_2_common_knowledge(self):
+        self.wikiSections[0].commonknowledge = True
+        self.wikiSections[0].save()
+        self.wikiSections[1].commonknowledge = True
+        self.wikiSections[1].save()
+        result = modelgetters.get_one_wiki_page_data(self.wikiPages[0].unid, self.secondUser)
+        self.assertEqual(result['wiki_page'], self.wikiPages[0])
+        self.assertListEqual(list(result['wiki_page_sections']), self.wikiSections[0:2])
+    
     def test_form_get_one_wiki_page_data_fail_permission(self):
         result = modelgetters.get_one_wiki_page_data(self.wikiPages[0].unid, self.secondUser)
         self.assertIsNone(result)

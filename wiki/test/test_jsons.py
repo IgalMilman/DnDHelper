@@ -128,6 +128,7 @@ class WikiPermissionsResponseTesting(TestCase):
             'updatedby': self.wikiSections[0].updatedby.get_username(),
             'pageorder': self.wikiSections[0].pageorder,
             'title': self.wikiSections[0].title,
+            'commonknowledge': False,
             'text': json.loads(self.wikiSections[0].text) if self.wikiSections[0].is_quill_content() else quill.quillify_text(self.wikiSections[0].text),
             'perm': [{'permsec':'qwe'}, {'permsec':'qwe'}] 
         }
@@ -145,6 +146,7 @@ class WikiPermissionsResponseTesting(TestCase):
             'updatedby': None,
             'pageorder': self.wikiSections[1].pageorder,
             'title': self.wikiSections[1].title,
+            'commonknowledge': False,
             'text': json.loads(self.wikiSections[1].text) if self.wikiSections[1].is_quill_content() else quill.quillify_text(self.wikiSections[1].text),
             'perm': [{'permsec':'qwe'}, {'permsec':'qwe'}] 
         }
@@ -163,6 +165,7 @@ class WikiPermissionsResponseTesting(TestCase):
             'updatedby': self.wikiPages[0].updatedby.get_username(),
             'commonknowledge': self.wikiPages[0].commonknowledge,
             'title': self.wikiPages[0].title,
+            'commonknowledge': False,
             'text': json.loads(self.wikiPages[0].text) if self.wikiPages[0].is_quill_content() else quill.quillify_text(self.wikiPages[0].text),
             'sec': [{'sec':'qwe'}, {'sec':'qwe'}, {'sec':'qwe'}] 
         }
@@ -180,6 +183,7 @@ class WikiPermissionsResponseTesting(TestCase):
             'updatedby': self.wikiPages[1].updatedby.get_username(),
             'commonknowledge': self.wikiPages[1].commonknowledge,
             'title': self.wikiPages[1].title,
+            'commonknowledge': False,
             'text': json.loads(self.wikiPages[1].text) if self.wikiPages[1].is_quill_content() else quill.quillify_text(self.wikiPages[1].text),
             'sec': [] 
         }
