@@ -34,6 +34,12 @@ class WikiPage(models.Model):
     keywords = models.ManyToManyField("Keywords", verbose_name="Keywords")
     text = models.TextField("Article text", null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        folder = self.get_files_folder()
+        if folder is not None:
+            self.text = quill.save_images_from_quill(self.text, folder)
+        super(WikiPage, self).save(*args, **kwargs)
+
     def createtime(self) -> datetime:
         return self.createdon.astimezone(pytz.timezone('America/New_York'))
 
@@ -59,24 +65,38 @@ class WikiPage(models.Model):
     def get_quill_content(self) -> str:
         if self.text is None:
             return ''
-        return quill.get_quill_text(self.text)
+        return quill.get_quill_text(self.text, files_link=self.get_files_link())
 
     def get_content(self) -> str:
         if self.text is None:
             return ''
         return self.text
 
+    def get_file(self, filename):
+        if os.path.exists(os.path.join(self.get_files_folder(), filename)):
+            file = open(os.path.join(self.get_files_folder(), filename), 'rb')
+            res = file.read()
+            file.close()
+            return res
+        return None
+
     def get_files_folder(self) -> str:
-        folder_path = os.path.join(settings.WIKI_FILES, str(self.unid))
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-        return folder_path
+        try:
+            folder_path = os.path.join(settings.WIKI_FILES, str(self.unid))
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+            return folder_path
+        except Exception:
+            return None
        
     def generate_link(self) -> str:
         return self.get_link()
        
     def get_link(self) -> str:
         return reverse('wiki_page', kwargs={'wikipageuuid': self.unid})
+       
+    def get_files_link(self) -> str:
+        return reverse('wiki_page_file_empty', kwargs={'wikipageuuid': self.unid})
 
     def anchor_id(self) -> str:
         return 'a'+str(self.unid)

@@ -1,6 +1,5 @@
 function sendPostAjax(link, data, success, failure, async = true) {
     data['csrfmiddlewaretoken'] = my_crsf_token;
-    console.log(data);
     $.ajax({
         type: "POST",
         url: link,

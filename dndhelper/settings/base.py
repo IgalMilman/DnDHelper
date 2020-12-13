@@ -92,11 +92,15 @@ LOGIN_REDIRECT_URL = '/'
 #         },
 #     },
 # }
+
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, '../db.sqlite3'),
-    }
+    'default':{
+        'ENGINE': 'django.db.backends.mysql',
+        'OPTIONS': {
+            'read_default_file': os.path.join(BASE_DIR, '../private/dbconfig.cnf'),
+        },
+    },
 }
 
 # Password validation
@@ -145,7 +149,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    join(BASE_DIR, 'staticoverride'),
-    join(BASE_DIR, 'dndhelper', 'static'),
-    join(BASE_DIR, 'wiki', 'static'),
+    join(dirname(BASE_DIR), 'staticoverride'),
+    #join(BASE_DIR, 'static'),
+    join(dirname(BASE_DIR), 'wiki', 'static'),
 )

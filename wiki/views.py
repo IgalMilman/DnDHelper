@@ -2,15 +2,19 @@ import json
 import logging
 import os
 from datetime import datetime
+from mimetypes import guess_type
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render, reverse
+from django.utils.encoding import smart_str
 from dndhelper import views as main_views
 
-from wiki import (modelgetters, wikipageform, wikipermissionsresponse,
-                  wikisectionform, wikiimportfile)
+from wiki import (modelgetters, wikiimportfile, wikipageform,
+                  wikipermissionsresponse, wikisectionform)
+from wiki.wikipage import WikiPage
+from wiki.wikisection import WikiSection
 
 # Create your views here.
 
@@ -118,5 +122,45 @@ def wikiImportAllPages(request):
     all_wiki_json = modelgetters.export_all_wiki_pages(request.user)
     response = HttpResponse(json.dumps(all_wiki_json, indent=4, sort_keys=True), content_type='text/json')
     response['Content-Disposition'] = 'attachment; filename="all_wiki_pages.json"'
+    return response
+
+
+@login_required( login_url = 'login' )
+def wikiPageFile(request, wikipageuuid, filename):
+    valid, response = main_views.initRequest(request)
+    if not valid:
+        return response
+    try:
+        wikipage = WikiPage.objects.get(unid=wikipageuuid)
+    except Exception:
+        wikipage = None
+    if wikipage is None:
+        return HttpResponseNotFound("File was not found")
+    filecontent = wikipage.get_file(filename)
+    if filecontent is None:
+        return HttpResponseNotFound("File was not found")
+    response = HttpResponse(filecontent, content_type=guess_type(filename)[0])
+    #response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
+    #response['X-Sendfile'] = smart_str(filename)
+    return response
+
+
+@login_required( login_url = 'login' )
+def wikiSectionFile(request, wikipageuuid, wikisectionuuid, filename):
+    valid, response = main_views.initRequest(request)
+    if not valid:
+        return response
+    try:
+        wikisection = WikiSection.objects.get(unid=wikisectionuuid)
+    except Exception:
+        wikisection = None
+    if wikisection is None:
+        return HttpResponseNotFound("File was not found")
+    filecontent = wikisection.get_file(filename)
+    if filecontent is None:
+        return HttpResponseNotFound("File was not found")
+    response = HttpResponse(filecontent, content_type=guess_type(filename)[0])
+    #response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
+    #response['X-Sendfile'] = smart_str(filename)
     return response
 

@@ -597,7 +597,6 @@ var Keyboard = {
   },
 
 
-  // TODO9438: These references to Keyboard need to not require global. Will 'this' work in this context?
   //
   /**
    * Traps the focus in the given element.
@@ -5125,8 +5124,6 @@ var Foundation = {
   getFnName: functionName,
 
   addToJquery: function ($) {
-    // TODO: consider not making this a jQuery function
-    // TODO: need way to reflow vs. re-initialize
     /**
      * The Foundation jQuery method.
      * @param {String|Array} method - An action to perform on the current jQuery object.
@@ -9609,7 +9606,6 @@ var Slider = function (_Plugin) {
 
       this._setValues($hndl, location);
 
-      // TODO update to calculate based on values set to respective inputs??
       if (isDbl) {
         var isLeftHndl = this.handles.index($hndl) === 0,
 

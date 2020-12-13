@@ -33,6 +33,12 @@ class WikiSection(models.Model):
     title = models.CharField("Title*", max_length=160, null=False, blank=False)
     text = models.TextField("Description of the issue", null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        folder = self.get_files_folder()
+        if folder is not None:
+            self.text = quill.save_images_from_quill(self.text, folder)
+        super(WikiSection, self).save(*args, **kwargs)
+
     def createtime(self):
         return self.createdon.astimezone(pytz.timezone('America/New_York'))
 
@@ -51,12 +57,6 @@ class WikiSection(models.Model):
     
     def __str__(self):
         return "Wiki section: " + str(self.title) + ". UNID: " + str(self.unid)
-
-    def get_files_folder(self):
-        folder_path = os.path.join(settings.WIKI_SECTION_FILES, str(self.unid))
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-        return folder_path
 
     def editable(self, user=None):
         if user is None:
@@ -113,12 +113,34 @@ class WikiSection(models.Model):
         if (self.wikipage is None):
             return None
         return reverse('wiki_page', kwargs={'wikipageuuid': self.wikipage.unid})
+       
+    def get_files_link(self):
+        if (self.wikipage is None):
+            return None
+        return reverse('wiki_section_file_empty', kwargs={'wikipageuuid': self.wikipage.unid, 'wikisectionuuid': self.unid})
+
+    def get_files_folder(self):
+        try:
+            folder_path = os.path.join(settings.WIKI_SECTION_FILES, str(self.unid))
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+            return folder_path
+        except Exception:
+            return None
+
+    def get_file(self, filename):
+        if os.path.exists(os.path.join(self.get_files_folder(), filename)):
+            file = open(os.path.join(self.get_files_folder(), filename), 'rb')
+            res = file.read()
+            file.close()
+            return res
+        return None
 
     def is_quill_content(self):
         return quill.check_quill_string(self.text)
 
     def get_quill_content(self):
-        return quill.get_quill_text(self.text)
+        return quill.get_quill_text(self.text, files_link=self.get_files_link())
 
     def get_content(self):
         return self.text
@@ -141,7 +163,7 @@ class WikiSection(models.Model):
         'updatedby': self.updatedby.get_username() if self.updatedby is not None else None,
         'pageorder': self.pageorder,
         'title': self.title,
-        'text': json.loads(self.text) if self.is_quill_content() else quill.quillify_text(self.text),
+        'text': quill.load_images_from_quill(json.loads(self.text) if self.is_quill_content() else quill.quillify_text(self.text), self.get_files_folder()),
         'perm': self.permission_list() 
         }
         return result

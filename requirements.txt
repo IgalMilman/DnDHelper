@@ -1,9 +1,8 @@
 django
-mod-wsgi
 django-crum
 mock
 dateutil
-mysql-connector-python
+mysql-connector
 mysqlclient
 sqlparse
 pytz

@@ -136,4 +136,10 @@ button.round,
     .distanceleft{
         margin-left: 0px;
     }
+
+    .menu{
+        margin: auto;
+        background-color: #EEEEFF !important;
+        color: black !important;
+    }
 }
