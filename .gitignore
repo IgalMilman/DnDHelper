@@ -105,6 +105,7 @@ venv.bak/
 
 #Private folders
 /private
+/uploads
 
 #Local settings
 dndhelper/settings/local.py
