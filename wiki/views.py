@@ -25,16 +25,16 @@ def wikiPageOpen(request, wikipageuuid):
     if not valid:
         return response
     datawikipage = modelgetters.get_one_wiki_page_data(wikipageuuid, request.user)
-    if datawikipage is None:
+    if (datawikipage is None) or not ('wiki_page' in datawikipage) or not isinstance(datawikipage['wiki_page'], WikiPage):
         return redirect(reverse('wiki_homepage'))
     data_section_form = wikisectionform.WikiSectionFormCreate(request, datawikipage['wiki_page'])
     if data_section_form is None:
         data = datawikipage
     else:
         data = {**data_section_form, **datawikipage}
-    data['PAGE_TITLE'] = 'Wiki: '+settings.SOFTWARE_NAME_SHORT
+    data['PAGE_TITLE'] = datawikipage['wiki_page'].title + ': ' + settings.SOFTWARE_NAME_SHORT
     data['built'] = datetime.now().strftime("%H:%M:%S")
-    data['needdatatables'] = True
+    data['needdatatables'] = False
     data['needquillinput'] = True
     return render(request, 'views/wikipage.html', data, content_type='text/html')
 
@@ -66,7 +66,7 @@ def wikiHomePage(request):
         return response
     data = modelgetters.form_all_wiki_pages_data(request.user)         
     data['add_wiki_pages'] = WikiPage.cancreate(request.user)
-    data['PAGE_TITLE'] = 'Wiki: ' + settings.SOFTWARE_NAME_SHORT
+    data['PAGE_TITLE'] = 'Wiki home page: ' + settings.SOFTWARE_NAME_SHORT
     data['built'] = datetime.now().strftime("%H:%M:%S")
     data['needdatatables'] = True
     data['needquillinput'] = False
