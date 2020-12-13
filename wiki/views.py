@@ -65,6 +65,7 @@ def wikiHomePage(request):
     if not valid:
         return response
     data = modelgetters.form_all_wiki_pages_data(request.user)         
+    data['add_wiki_pages'] = WikiPage.cancreate(request.user)
     data['PAGE_TITLE'] = 'Wiki: ' + settings.SOFTWARE_NAME_SHORT
     data['built'] = datetime.now().strftime("%H:%M:%S")
     data['needdatatables'] = True

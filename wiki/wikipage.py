@@ -271,6 +271,10 @@ class WikiPage(models.Model):
     
     @staticmethod
     def cancreate(user):
+        if user is None:
+            user = get_current_user()
+        if user is None:
+            return False
         return user.is_superuser
 
     # def is_quill_content(self):

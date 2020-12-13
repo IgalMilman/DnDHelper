@@ -12,7 +12,7 @@
         {% for article in wiki_pages %} {% include "views/oneitemrow/wikirow.html" with wikip=article %} {% endfor %}
     </tbody>
 </table>
-
+{% if add_wiki_pages %}
 <div class="row align-middle" data-equalizer>
     <div class='columns'></div>
     <div class="columns small-9 middle-7 large-5 text-middle" data-equalizer-watch>
@@ -21,7 +21,7 @@
     </div>
     <div class='columns'></div>
 </div>
-
+{% endif %}
 {% if needdatatables %}
 <script>
     $(document).ready(function() {
