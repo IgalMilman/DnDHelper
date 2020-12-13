@@ -119,6 +119,10 @@ button.round,
     justify-content: center;
 }
 
+.width-33{
+    width:33%;
+}
+
 @media screen and (max-width: 39.99875em) {
     .accordion-content {
         padding-left: 0rem;

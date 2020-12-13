@@ -21,6 +21,11 @@ class WikiPageForm(forms.ModelForm):
         #     'postedon':  forms.SplitDateTimeWidget
         # }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'instance' in kwargs:            
+            self.fields['text'].widget.quillobject = kwargs['instance']
+
 def WikiArticleFormParse(request):
     data={}
     data['PAGE_TITLE'] = 'Change posted atricle: ' + settings.SOFTWARE_NAME_SHORT
@@ -72,9 +77,7 @@ def WikiArticleFormParse(request):
                     model.updatedby = request.user
                     model.updatedon = datetime.now(pytz.utc)
                     model.save()
-                    return redirect(model.get_link())                    
-                curpost.createdon = datetime.now(pytz.utc)
-                curpost.save()
+                    return redirect(model.get_link())
                 data['action'] = 'changed'
                 data['targetid'] = request.POST['targetid']
                 data['PAGE_TITLE'] = 'Post an article: ' + settings.SOFTWARE_NAME_SHORT

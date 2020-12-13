@@ -15,6 +15,7 @@ class QuillWidget(forms.Textarea):
     template_name = 'forms/widget/quill.html'
 
     def __init__(self, attrs=None):
+        self.quillobject = None
         super().__init__(attrs=attrs)
 
     def get_context(self, name, value, attrs):
@@ -27,8 +28,14 @@ class QuillWidget(forms.Textarea):
             context['widget']['theme'] = 'snow'
         if 'toolbar' in self.attrs:
             context['widget']['toolbar'] = self.attrs['toolbar']
+        filelink = None
+        if self.quillobject is not None:
+            try:
+                filelink = self.quillobject.get_files_link()
+            except Exception:
+                filelink = None
         if 'value' in context['widget']:
-            context['widget']['quill_object']=QuillObject(context['widget']['value'])
+            context['widget']['quill_object']=QuillObject(context['widget']['value'], filelink)
         return context
 
 
@@ -173,13 +180,16 @@ def load_images_from_quill(inputstr, filepath:str)->dict:
 
 
 class QuillObject():
-    def __init__(self, text=""):
+    def __init__(self, text="", filelink=None):
         self.text=text
+        self.filelink = filelink
 
     def is_quill_content(self):
         return check_quill_string(self.text)
 
     def get_quill_content(self, files_link:str=None):
+        if (files_link is None) and (files_link is not None):
+            return get_quill_text(self.text, files_link=self.filelink)
         return get_quill_text(self.text, files_link=files_link)
 
     def get_quill_value(self):

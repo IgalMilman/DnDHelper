@@ -27,8 +27,13 @@ class WikiSectionForm(forms.ModelForm):
         wikis = super(WikiSectionForm, self).save(commit=False)
         return wikis
 
-    def get_files(self, request):
-        return request.FILES.getlist('file_field')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'instance' in kwargs:            
+            self.fields['text'].widget.quillobject = kwargs['instance']
+
+    # def get_files(self, request):
+    #     return request.FILES.getlist('file_field')
 
 def WikiSectionFormCreate(request, curpage):
     data={}

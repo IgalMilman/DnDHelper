@@ -20,7 +20,6 @@ class ChangeUserForm(auth_forms.UserChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if 'instance' in kwargs:            
-            print(kwargs['instance'].first_name)
             self.fields['first_name'].initial = kwargs['instance'].first_name
             self.fields['last_name'].initial = kwargs['instance'].last_name
 
