@@ -98,7 +98,7 @@ DATABASES = {
     'default':{
         'ENGINE': 'django.db.backends.mysql',
         'OPTIONS': {
-            'read_default_file': os.path.join(BASE_DIR, '../private/dbconfig.cnf'),
+            'read_default_file': os.path.join(dirname(BASE_DIR), 'private/dbconfig.cnf'),
         },
     },
 }
@@ -151,5 +151,5 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     join(dirname(BASE_DIR), 'staticoverride'),
     #join(BASE_DIR, 'static'),
-    join(dirname(BASE_DIR), 'wiki', 'static'),
+    #join(dirname(BASE_DIR), 'wiki', 'static'),
 )
