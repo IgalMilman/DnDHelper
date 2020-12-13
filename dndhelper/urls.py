@@ -36,7 +36,7 @@ urlpatterns = [
     {'password_reset_form':dndhelper_loginform.my_reset_password_form, 
     'form_class': dndhelper_loginform.my_reset_password_form}, 'password_reset'),
     path('accounts/login/', auth_views.LoginView.as_view(authentication_form=dndhelper_loginform.MyAuthLoginForm), name='login'),
-    path('accounts/register/', dndhelper_views.register, name='register'),
+    path('accounts/register/', dndhelper_views.register, name='register_user'),
     path('accounts/change/', dndhelper_views.changeuserpage),
     path('accounts/', include('django.contrib.auth.urls')),
     path('data/', include('datamanagement.urls')),
