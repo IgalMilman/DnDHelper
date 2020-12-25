@@ -178,6 +178,32 @@ def load_images_from_quill(inputstr, filepath:str)->dict:
         return quilldict
     return json.dumps(quilldict)
 
+def get_quill_text_simple(inputstr, number_of_lines:int=1):
+    if inputstr is None:
+        return inputstr
+    if number_of_lines <1:
+        return ''
+    quilldict = get_quill_value(inputstr)
+    if not isinstance(quilldict, dict):
+        return inputstr
+    result = ""
+    got_lines = 0
+    for operation in quilldict['ops']:
+        if 'insert' in operation:
+            if isinstance(operation['insert'], str):
+                result += operation['insert']
+                if '\n' in result:
+                    got_lines += 1
+                    if got_lines >= number_of_lines:
+                        break
+    if result[-1] == '\n':
+        result = result[:-1]
+    while (result.count('\n') > number_of_lines - 1):
+        result = result[:-len(result)+result.rfind('\n')]
+    return result
+    
+
+
 
 class QuillObject():
     def __init__(self, text="", filelink=None):
@@ -200,3 +226,6 @@ class QuillObject():
 
     def get_content_js(self):
         return self.text.replace("\n", "\\n")
+    
+    def get_content_simple_text_one_line(self):
+        return get_quill_text_simple(self.text)

@@ -138,10 +138,19 @@ class WikiSection(models.Model):
         return None
 
     def is_quill_content(self):
+        if self.text is None:
+            return False
         return quill.check_quill_string(self.text)
 
     def get_quill_content(self):
+        if self.text is None:
+            return ''
         return quill.get_quill_text(self.text, files_link=self.get_files_link())
+
+    def get_quill_content_simple(self):
+        if self.text is None:
+            return ''
+        return quill.get_quill_text_simple(self.text, number_of_lines=number_of_lines)
 
     def get_content(self):
         return self.text

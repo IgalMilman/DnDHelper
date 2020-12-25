@@ -1,12 +1,5 @@
 {% extends "_basenarrow.html" %}{% block page_title %}Log in to the {{ SOFTWARE_NAME }}{% endblock %}{% load static %} {% block extra_css %}{% endblock %} {% block body %} {% csrf_token %}
 <h2 class="text-center">Welcome to the {{ SOFTWARE_NAME_SHORT }}</h2>
-{% if messages %}
-<ul>
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
 <form method="post" action="{% url 'login' %}">
     {% csrf_token %} {{ form.as_p }}
 

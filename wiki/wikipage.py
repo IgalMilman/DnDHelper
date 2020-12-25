@@ -60,12 +60,19 @@ class WikiPage(models.Model):
         return "Wiki title: " + str(self.title) + ". UNID: " + str(self.unid)
 
     def is_quill_content(self) -> bool:
+        if self.text is None:
+            return False
         return quill.check_quill_string(self.text)
 
     def get_quill_content(self) -> str:
         if self.text is None:
             return ''
         return quill.get_quill_text(self.text, files_link=self.get_files_link())
+
+    def get_quill_content_simple(self, number_of_lines=1) -> str:
+        if self.text is None:
+            return ''
+        return quill.get_quill_text_simple(self.text, number_of_lines=number_of_lines)
 
     def get_content(self) -> str:
         if self.text is None:

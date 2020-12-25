@@ -16,8 +16,7 @@
 </ol>
 </div>
     {% if wiki_page.editable  %}
-    {% comment %} <div class="columns text-left"></div> {% endcomment %}
-    <div class="columns text-right width-33"><b>Created on:</b> {{ wiki_page.createtime|date:"Y-m-d h:i a" }}<br>
+    <div class="columns text-right"><b>Created on:</b> {{ wiki_page.createtime|date:"Y-m-d h:i a" }}<br>
     <b>Updated on:</b> {{ wiki_page.updatetime|date:"Y-m-d h:i a" }}<br>
 <b>Created by:</b> {{ wiki_page.createuser }}<br>
 <b>Updated by:</b> {{ wiki_page.updateuser }}
