@@ -14,6 +14,7 @@ from permissions import permissions_response
 from permissions.permissions import (PERMISSION_LEVELS_DICTIONARY,
                                      PERMISSION_LEVELS_TUPLES, Permission)
 from wiki import modelgetters, wikipermissionsresponse
+from wiki.permissionpage import PermissionPage
 from wiki.permissionsection import PermissionSection
 from wiki.wikipage import Keywords, WikiPage
 from wiki.wikisection import WikiSection
@@ -27,10 +28,12 @@ class req:
         self.GET = getdic
 
 
-class WikiPermissionsResponseTesting(TestCase):
+class WikiJsonTesting(TestCase):
     def setUp(self):
         self.permsecjson = PermissionSection.json
         self.permsecfromjson = PermissionSection.fromjson
+        self.permpagejson = PermissionPage.json
+        self.permpagefromjson = PermissionPage.fromjson
         self.wikisecjson = WikiSection.json
         self.wikisecfromjson = WikiSection.fromjson
         self.wikisPermable = WikiSection.permissionsable 
@@ -57,6 +60,10 @@ class WikiPermissionsResponseTesting(TestCase):
             self.wikiPages[i].createdon=self.createdtime + timedelta(hours=i)
             self.wikiPages[i].updatedon=self.createdtime + timedelta(hours=i)
             self.wikiPages[i].save()
+        self.pagepermissions = []
+        pagep = PermissionPage(createdby=self.firstUser, accesslevel=20, grantedto=self.thirdUser, wikipage=self.wikiPages[1])
+        pagep.save()
+        self.pagepermissions.append(pagep)
         self.wikiSections = []
         for i in range(3):
             self.wikiSections.append(WikiSection(unid=self.wikisuuid[i], createdon=self.createdtime, updatedon=self.createdtime, createdby=self.firstUser, updatedby=self.secondUser, title='testsec'+str(i+1), pageorder=i+1, text=self.wikistext[i], wikipage=self.wikiPages[0]))
@@ -77,18 +84,12 @@ class WikiPermissionsResponseTesting(TestCase):
             perm.save()
             self.permissions.append(perm)
             self.wikiSections[i].save()
-        # wikisectionform.settings.SOFTWARE_NAME_SHORT = self.softwarename
-        # os.path.exists = mock.Mock(return_value=True, spec='os.path.exists')
-        # os.makedirs = mock.Mock(return_value=None, spec='os.makedirs')
-        # wikisectionform.render = mock.Mock(side_effect=render_mock)
-        # wikisectionform.redirect = mock.Mock(side_effect=redirect_mock)
-        # wikisectionform.reverse = mock.Mock(side_effect=reverse_mock)
-        # wikipage.reverse = mock.Mock(side_effect=reverse_mock)
-        # wikisection.reverse = mock.Mock(side_effect=reverse_mock)  
     
     def tearDown(self):
         PermissionSection.json = self.permsecjson
         PermissionSection.fromjson = self.permsecfromjson
+        PermissionPage.json = self.permpagejson
+        PermissionPage.fromjson = self.permpagefromjson
         WikiSection.json = self.wikisecjson
         WikiSection.fromjson = self.wikisecfromjson
         WikiSection.permissionsable = self.wikisPermable
@@ -156,6 +157,7 @@ class WikiPermissionsResponseTesting(TestCase):
 
     def test_wiki_page_json_first(self):
         WikiSection.json = mock.Mock(return_value={'sec':'qwe'})
+        PermissionPage.json = mock.Mock(return_value={'permpage':'qwe'})
         wikipage = self.wikiPages[0].json()
         wikipage_right = {
             'unid': str(self.wikiPages[0].unid),
@@ -166,6 +168,7 @@ class WikiPermissionsResponseTesting(TestCase):
             'commonknowledge': self.wikiPages[0].commonknowledge,
             'title': self.wikiPages[0].title,
             'commonknowledge': False,
+            'perm': [],
             'text': json.loads(self.wikiPages[0].text) if self.wikiPages[0].is_quill_content() else quill.quillify_text(self.wikiPages[0].text),
             'sec': [{'sec':'qwe'}, {'sec':'qwe'}, {'sec':'qwe'}] 
         }
@@ -174,6 +177,7 @@ class WikiPermissionsResponseTesting(TestCase):
         
     def test_wiki_page_json_second(self):
         WikiSection.json = mock.Mock(return_value={'sec':'qwe'})
+        PermissionPage.json = mock.Mock(return_value={'permpage':'qwe'})
         wikipage = self.wikiPages[1].json()
         wikipage_right = {
             'unid': str(self.wikiPages[1].unid),
@@ -184,10 +188,12 @@ class WikiPermissionsResponseTesting(TestCase):
             'commonknowledge': self.wikiPages[1].commonknowledge,
             'title': self.wikiPages[1].title,
             'commonknowledge': False,
+            'perm': [{'permpage':'qwe'}],
             'text': json.loads(self.wikiPages[1].text) if self.wikiPages[1].is_quill_content() else quill.quillify_text(self.wikiPages[1].text),
             'sec': [] 
         }
         self.assertDictEqual(wikipage, wikipage_right)
+        self.assertEqual(PermissionPage.json.call_count, len(self.wikiPages[1].permissions.all()))
         self.assertEqual(WikiSection.json.call_count, len(self.wikiPages[1].wikisection_set.all()))
 
     def test_permission_section_from_json_fail_no_granted(self):

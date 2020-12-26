@@ -72,9 +72,10 @@ class User{
 }
 
 class Section{
-    constructor(sectionid, sectiontitle){
+    constructor(sectionid, sectiontitle, ispage = false){
         this.sectionid = sectionid;
         this.sectiontitle = sectiontitle;
+        this.ispage = ispage;
     }
 
     static fromDictionary(dict){
@@ -90,8 +91,25 @@ class Permission{
     static parsePermissionData(data, link){
         Permission.PERMISSION_LEVELS = data['permlevels'];
         var rawsections = data['sections'];
+        var pagedata = data['page'];
         var users = {};
         var sections = {};
+        if (pagedata !== undefined){
+            var section = new Section(undefined, "Page", true);
+            for (const secperm of pagedata) {
+                var user = undefined;
+                if(secperm['grantedto']['username'] in users){
+                    user = users[secperm['grantedto']['username']];
+                }
+                else{
+                    user = User.fromDictionary(secperm['grantedto']);
+                    users[user.username] = user;
+                }
+                var perm = new Permission(section.sectionid, user.username, secperm['permlevel'], link, true);
+                user.addPermission(section.sectionid, perm);
+            }
+            sections[section.sectionid] = section;
+        }
         for (const rawsection of rawsections) {
             var section = Section.fromDictionary(rawsection);
             for (const secperm of rawsection['secperm']) {
@@ -111,11 +129,12 @@ class Permission{
         return {'users': users, 'sections': sections};
     }
 
-    constructor(unid=undefined, username=undefined, plevel=0, link=''){
+    constructor(unid=undefined, username=undefined, plevel=0, link='', ispage=false){
         this.permlevel = plevel;
         this.username = username;
         this.unid = unid;
         this.link = link;
+        this.ispage = ispage;
     }
 
     getUsername(){
@@ -152,6 +171,9 @@ class Permission{
     }
 
     createData(){
+        if (this.ispage){
+            return {'username':this.getUsername(), 'permissionlevel': this.selectElement.value, 'action':'setperm'};
+        }
         return {'username':this.getUsername(), 'permissionlevel': this.selectElement.value, 'targetid': this.getUnid(), 'action':'setperm'};
     }
 
@@ -224,7 +246,6 @@ class PermissionPopup{
             "iDisplayLength": -1
         });
         var confirmation = new Foundation.Reveal($('#'+this.popup.id));
-        // open
         confirmation.open();
     }
 

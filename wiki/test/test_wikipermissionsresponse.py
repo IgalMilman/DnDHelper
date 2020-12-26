@@ -28,11 +28,11 @@ class req:
 
 class WikiPermissionsResponseTesting(TestCase):
     def setUp(self):
-        self.setpermreq = wikipermissionsresponse.set_permissions_request
-        self.setperm = wikipermissionsresponse.set_permissions
+        self.setpermreq = wikipermissionsresponse.set_permissions_request_section
+        self.setperm = wikipermissionsresponse.set_permissions_section
         self.getsec = wikipermissionsresponse.get_sections
         self.getusers = wikipermissionsresponse.get_users
-        self.getpermdata = wikipermissionsresponse.get_permissions_data
+        self.getpermdata = wikipermissionsresponse.get_permissions_data_section
         self.wikiperm = wikipermissionsresponse.get_permissions_for_section
         self.getperm = wikipermissionsresponse.permissions_response.get_permission_level_data
         self.firstUser = User(is_superuser=True, username='test1', password='test1', email='test1@example.com', first_name='testname1', last_name='testlast2')
@@ -83,23 +83,15 @@ class WikiPermissionsResponseTesting(TestCase):
             perm.save()
             self.permissions.append(perm)
             self.wikiSections[i].save()
-        settings.SOFTWARE_NAME_SHORT = self.softwarename
-        # wikisectionform.settings.SOFTWARE_NAME_SHORT = self.softwarename
-        # os.path.exists = mock.Mock(return_value=True, spec='os.path.exists')
-        # os.makedirs = mock.Mock(return_value=None, spec='os.makedirs')
-        # wikisectionform.render = mock.Mock(side_effect=render_mock)
-        # wikisectionform.redirect = mock.Mock(side_effect=redirect_mock)
-        # wikisectionform.reverse = mock.Mock(side_effect=reverse_mock)
-        # wikipage.reverse = mock.Mock(side_effect=reverse_mock)
-        # wikisection.reverse = mock.Mock(side_effect=reverse_mock)   
+        settings.SOFTWARE_NAME_SHORT = self.softwarename 
 
     def tearDown(self):
         wikipermissionsresponse.get_permissions_for_section = self.wikiperm
         wikipermissionsresponse.permissions_response.get_permission_level_data = self.getperm
-        wikipermissionsresponse.set_permissions_request = self.setpermreq
-        wikipermissionsresponse.set_permissions = self.setperm
+        wikipermissionsresponse.set_permissions_request_section = self.setpermreq
+        wikipermissionsresponse.set_permissions_section = self.setperm
         wikipermissionsresponse.get_sections = self.getsec
-        wikipermissionsresponse.get_permissions_data = self.getpermdata
+        wikipermissionsresponse.get_permissions_data_section = self.getpermdata
         wikipermissionsresponse.get_users = self.getusers
 
     def test_get_all_users_data(self):
@@ -304,30 +296,30 @@ class WikiPermissionsResponseTesting(TestCase):
         self.assertIsNone(wikipage)
 
     def test_set_permissions_users_none(self):
-        result = wikipermissionsresponse.set_permissions(None, self.wikiSections[0], 10, self.firstUser)
+        result = wikipermissionsresponse.set_permissions_section(None, self.wikiSections[0], 10, self.firstUser)
         self.assertEqual(result, -1)
 
     def test_set_permissions_section_none(self):
-        result = wikipermissionsresponse.set_permissions([self.firstUser], None, 10, self.firstUser)
+        result = wikipermissionsresponse.set_permissions_section([self.firstUser], None, 10, self.firstUser)
         self.assertEqual(result, -1)
 
     def test_set_permissions_curuser_none(self):
-        result = wikipermissionsresponse.set_permissions([self.firstUser], self.wikiSections[0], 10, None)
+        result = wikipermissionsresponse.set_permissions_section([self.firstUser], self.wikiSections[0], 10, None)
         self.assertEqual(result, -1)
 
     def test_set_permissions_curuser_no_permissions(self):
-        result = wikipermissionsresponse.set_permissions([self.firstUser], self.wikiSections[0], 10, self.fourthUser)
+        result = wikipermissionsresponse.set_permissions_section([self.firstUser], self.wikiSections[0], 10, self.fourthUser)
         self.assertEqual(result, -1)
 
     def test_set_permissions_new_permission(self):
         count = len(PermissionSection.objects.all())
-        result = wikipermissionsresponse.set_permissions([self.firstUser], self.wikiSections[0], 10, self.firstUser)
+        result = wikipermissionsresponse.set_permissions_section([self.firstUser], self.wikiSections[0], 10, self.firstUser)
         self.assertEqual(result, 1)
         self.assertEqual(len(PermissionSection.objects.all()), count + 1)
 
     def test_set_permissions_change_permission(self):
         count = len(PermissionSection.objects.all())
-        result = wikipermissionsresponse.set_permissions([self.secondUser], self.wikiSections[1], 20, self.firstUser)
+        result = wikipermissionsresponse.set_permissions_section([self.secondUser], self.wikiSections[1], 20, self.firstUser)
         p = PermissionSection.objects.get(grantedto = self.secondUser, section = self.wikiSections[1])
         self.assertEqual(result, 1)
         self.assertEqual(len(PermissionSection.objects.all()), count)
@@ -335,7 +327,7 @@ class WikiPermissionsResponseTesting(TestCase):
 
     def test_set_permissions_list_of_users(self):
         count = len(PermissionSection.objects.all())
-        result = wikipermissionsresponse.set_permissions([self.firstUser, self.secondUser, self.fourthUser], self.wikiSections[1], 20, self.firstUser)
+        result = wikipermissionsresponse.set_permissions_section([self.firstUser, self.secondUser, self.fourthUser], self.wikiSections[1], 20, self.firstUser)
         self.assertEqual(result, 3)
         p = PermissionSection.objects.get(grantedto = self.firstUser, section = self.wikiSections[1])
         self.assertEqual(p.createdby, self.firstUser)
@@ -349,7 +341,7 @@ class WikiPermissionsResponseTesting(TestCase):
 
     def test_get_permissions_data_none(self):
         sections = None
-        self.assertIsNone(wikipermissionsresponse.get_permissions_data(sections))
+        self.assertIsNone(wikipermissionsresponse.get_permissions_data_section(sections))
 
     def test_get_permissions_data_one_section(self):
         sections = [self.wikiSections[0]]
@@ -357,7 +349,7 @@ class WikiPermissionsResponseTesting(TestCase):
         getperm = wikipermissionsresponse.permissions_response.get_permission_level_data
         wikipermissionsresponse.get_permissions_for_section = mock.Mock(return_value='permsec')
         wikipermissionsresponse.permissions_response.get_permission_level_data = mock.Mock(return_value='permlevel')
-        result = wikipermissionsresponse.get_permissions_data(sections)
+        result = wikipermissionsresponse.get_permissions_data_section(sections)
         self.assertEqual(wikipermissionsresponse.get_permissions_for_section.call_count, 1)
         self.assertEqual(wikipermissionsresponse.permissions_response.get_permission_level_data.call_count, 1)
 
@@ -372,7 +364,7 @@ class WikiPermissionsResponseTesting(TestCase):
         sections = [self.wikiSections[0], self.wikiSections[1]]
         wikipermissionsresponse.get_permissions_for_section = mock.Mock(return_value='permsec')
         wikipermissionsresponse.permissions_response.get_permission_level_data = mock.Mock(return_value='permlevel')
-        result = wikipermissionsresponse.get_permissions_data(sections)
+        result = wikipermissionsresponse.get_permissions_data_section(sections)
         neededresult = [{'secid':None, 'sectitle':'All', 'secperm':'permsec'},
         {'secid':sections[0].unid, 'sectitle':sections[0].title, 'secperm':'permsec'},
         {'secid':sections[1].unid, 'sectitle':sections[1].title, 'secperm':'permsec'}]
@@ -385,112 +377,112 @@ class WikiPermissionsResponseTesting(TestCase):
         
     def test_set_permissions_request_no_permissionlevel(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=[self.firstUser, self.secondUser])
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=2)
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=2)
         sections = [self.wikiSections[0], self.wikiSections[1]]
         request = req('POST', {}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertIsNone(result)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 0)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, 0)
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, 0)
         
         
     def test_set_permissions_request_permissionlevel_not_number(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=[self.firstUser, self.secondUser])
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=2)
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=2)
         sections = [self.wikiSections[0], self.wikiSections[1]]
         request = req('POST', {'permissionlevel': 'q'}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertIsNone(result)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 0)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, 0)
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, 0)
         
         
     def test_set_permissions_request_sections_none(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=[self.firstUser, self.secondUser])
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=2)
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=2)
         sections = None
         request = req('POST', {'permissionlevel': 10}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertIsNone(result)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 0)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, 0)
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, 0)
         
         
     def test_set_permissions_request_get_users_none(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=None)
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=2)
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=2)
         sections = [self.wikiSections[0], self.wikiSections[1]]
         request = req('POST', {'permissionlevel': 10}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertIsNone(result)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 1)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, 0)
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, 0)
         
     def test_set_permissions_request_get_users_error(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=[self.firstUser], side_effect=Exception('Error'))
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=2)
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=2)
         sections = [self.wikiSections[0], self.wikiSections[1]]
         request = req('POST', {'permissionlevel': 10}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertIsNone(result)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 1)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, 0)
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, 0)
         
     def test_set_permissions_request_set_perm_error(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=[self.firstUser])
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=2, side_effect=Exception('Error'))
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=2, side_effect=Exception('Error'))
         sections = [self.wikiSections[0], self.wikiSections[1]]
         request = req('POST', {'permissionlevel': 10}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertIsNone(result)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 1)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, 1)
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, 1)
         
         
     def test_set_permissions_request_one_section(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=[self.firstUser, self.secondUser])
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=2)
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=2)
         sections = [self.wikiSections[0]]
         request = req('POST', {'permissionlevel': 10}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 1)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, len(sections))
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, len(sections))
         self.assertDictEqual(result, {'status': 'success', 'countcreated': len(sections)*len(wikipermissionsresponse.get_users()), 
         'countneeded':len(sections)*len(wikipermissionsresponse.get_users()) })
         
         
     def test_set_permissions_request_one_user(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=[self.firstUser])
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=1)
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=1)
         sections = [self.wikiSections[0], self.wikiSections[1]]
         request = req('POST', {'permissionlevel': 10}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 1)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, len(sections))
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, len(sections))
         self.assertDictEqual(result, {'status': 'success', 'countcreated': len(sections)*len(wikipermissionsresponse.get_users()), 
         'countneeded':len(sections)*len(wikipermissionsresponse.get_users()) })
         
         
     def test_set_permissions_request_one_user_one_section(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=[self.firstUser])
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=1)
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=1)
         sections = [self.wikiSections[0]]
         request = req('POST', {'permissionlevel': 10}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 1)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, len(sections))
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, len(sections))
         self.assertDictEqual(result, {'status': 'success', 'countcreated': len(sections)*len(wikipermissionsresponse.get_users()), 
         'countneeded':len(sections)*len(wikipermissionsresponse.get_users()) })
         
         
     def test_set_permissions_request_multiple_sections_multiple_users(self):
         wikipermissionsresponse.get_users = mock.Mock(return_value=[self.firstUser, self.secondUser])
-        wikipermissionsresponse.set_permissions = mock.Mock(return_value=2)
+        wikipermissionsresponse.set_permissions_section = mock.Mock(return_value=2)
         sections = [self.wikiSections[0], self.wikiSections[1]]
         request = req('POST', {'permissionlevel': 10}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertEqual(wikipermissionsresponse.get_users.call_count, 1)
-        self.assertEqual(wikipermissionsresponse.set_permissions.call_count, len(sections))
+        self.assertEqual(wikipermissionsresponse.set_permissions_section.call_count, len(sections))
         self.assertDictEqual(result, {'status': 'success', 'countcreated': len(sections)*len(wikipermissionsresponse.get_users()), 
         'countneeded':len(sections)*len(wikipermissionsresponse.get_users()) })
         
@@ -501,52 +493,52 @@ class WikiPermissionsResponseTesting(TestCase):
         numperm = len(PermissionSection.objects.all())
         sections = [self.wikiSections[0], self.wikiSections[1]]
         request = req('POST', {'permissionlevel': 10, 'username': self.firstUser.get_username()}, None, self.firstUser)
-        result = wikipermissionsresponse.set_permissions_request(request, sections)
+        result = wikipermissionsresponse.set_permissions_request_section(request, sections)
         self.assertEqual(len(PermissionSection.objects.all()), numperm + 2)
         self.assertDictEqual(result, {'status': 'success', 'countcreated': len(sections), 
         'countneeded':len(sections) })
         
     def test_handle_permissions_request_sections_is_none(self):
         wikipermissionsresponse.get_sections = mock.Mock(return_value=None)
-        wikipermissionsresponse.get_permissions_data = mock.Mock(return_value='get_perm')
-        wikipermissionsresponse.set_permissions_request = mock.Mock(return_value='set_perm')
+        wikipermissionsresponse.get_permissions_data_section = mock.Mock(return_value='get_perm')
+        wikipermissionsresponse.set_permissions_request_section = mock.Mock(return_value='set_perm')
         request = req('POST', {'action': 'setperm'}, None, self.firstUser)
-        result = wikipermissionsresponse.handle_permissions_request(request, self.wikiPages[0])
+        result = wikipermissionsresponse.handle_permissions_request_section(request, self.wikiPages[0])
         self.assertIsNone(result)
         
     def test_handle_permissions_request_no_action(self):
         wikipermissionsresponse.get_sections = mock.Mock(return_value=[self.wikiSections[0], self.wikiSections[1]])
-        wikipermissionsresponse.get_permissions_data = mock.Mock(return_value='get_perm')
-        wikipermissionsresponse.set_permissions_request = mock.Mock(return_value='set_perm')
+        wikipermissionsresponse.get_permissions_data_section = mock.Mock(return_value='get_perm')
+        wikipermissionsresponse.set_permissions_request_section = mock.Mock(return_value='set_perm')
         request = req('POST', {}, None, self.firstUser)
-        result = wikipermissionsresponse.handle_permissions_request(request, self.wikiPages[0])
+        result = wikipermissionsresponse.handle_permissions_request_section(request, self.wikiPages[0])
         self.assertIsNone(result)
 
         
     def test_handle_permissions_request_action_is_wrong(self):
         wikipermissionsresponse.get_sections = mock.Mock(return_value=[self.wikiSections[0], self.wikiSections[1]])
-        wikipermissionsresponse.get_permissions_data = mock.Mock(return_value='get_perm')
-        wikipermissionsresponse.set_permissions_request = mock.Mock(return_value='set_perm')
+        wikipermissionsresponse.get_permissions_data_section = mock.Mock(return_value='get_perm')
+        wikipermissionsresponse.set_permissions_request_section = mock.Mock(return_value='set_perm')
         request = req('POST', {'action': 'qwetrty'}, None, self.firstUser)
-        result = wikipermissionsresponse.handle_permissions_request(request, self.wikiPages[0])
+        result = wikipermissionsresponse.handle_permissions_request_section(request, self.wikiPages[0])
         self.assertIsNone(result)
 
     def test_handle_permissions_request_get_request(self):
         wikipermissionsresponse.get_sections = mock.Mock(return_value=[self.wikiSections[0], self.wikiSections[1]])
-        wikipermissionsresponse.get_permissions_data = mock.Mock(return_value='get_perm')
-        wikipermissionsresponse.set_permissions_request = mock.Mock(return_value='set_perm')
+        wikipermissionsresponse.get_permissions_data_section = mock.Mock(return_value='get_perm')
+        wikipermissionsresponse.set_permissions_request_section = mock.Mock(return_value='set_perm')
         request = req('GET', None, {}, self.firstUser)
-        result = wikipermissionsresponse.handle_permissions_request(request, self.wikiPages[0])
+        result = wikipermissionsresponse.handle_permissions_request_section(request, self.wikiPages[0])
         self.assertEqual(result, 'get_perm')
-        self.assertEqual(wikipermissionsresponse.get_permissions_data.call_count, 1)
+        self.assertEqual(wikipermissionsresponse.get_permissions_data_section.call_count, 1)
         self.assertEqual(wikipermissionsresponse.get_sections.call_count, 1)
 
     def test_handle_permissions_request_post_setperm(self):
         wikipermissionsresponse.get_sections = mock.Mock(return_value=[self.wikiSections[0], self.wikiSections[1]])
-        wikipermissionsresponse.get_permissions_data = mock.Mock(return_value='get_perm')
-        wikipermissionsresponse.set_permissions_request = mock.Mock(return_value='set_perm')
+        wikipermissionsresponse.get_permissions_data_section = mock.Mock(return_value='get_perm')
+        wikipermissionsresponse.set_permissions_request_section = mock.Mock(return_value='set_perm')
         request = req('POST', {'action': 'setperm'}, None, self.firstUser)
-        result = wikipermissionsresponse.handle_permissions_request(request, self.wikiPages[0])
+        result = wikipermissionsresponse.handle_permissions_request_section(request, self.wikiPages[0])
         self.assertEqual(result, 'set_perm')
-        self.assertEqual(wikipermissionsresponse.set_permissions_request.call_count, 1)
+        self.assertEqual(wikipermissionsresponse.set_permissions_request_section.call_count, 1)
         self.assertEqual(wikipermissionsresponse.get_sections.call_count, 1)

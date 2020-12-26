@@ -14,6 +14,7 @@ from django.db import models
 from django.urls import reverse
 from dndhelper import sendemail as emailsending
 from dndhelper.widget import quill
+from permissions.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
 
 
 def time_now(instance=None):
@@ -115,7 +116,13 @@ class WikiPage(models.Model):
             return False
         if user.is_superuser:
             return True
-        return False
+        try:
+            permissionlevel = self.permissions.get(grantedto=user)
+            if permissionlevel is None:
+                return False
+            return permissionlevel.accesslevel >= PERMISSION_LEVELS_DICTIONARY['Edit']
+        except Exception:
+            return False
 
     def permissionsable(self, user:User=None) -> bool:
         if user is None:
@@ -124,7 +131,13 @@ class WikiPage(models.Model):
             return False
         if user.is_superuser:
             return True
-        return False
+        try:
+            permissionlevel = self.permissions.get(grantedto=user)
+            if permissionlevel is None:
+                return False
+            return permissionlevel.accesslevel >= PERMISSION_LEVELS_DICTIONARY['Permissions']
+        except Exception:
+            return False
 
     def viewable(self, user:User=None) -> bool:
         if user is None:
@@ -135,6 +148,14 @@ class WikiPage(models.Model):
             return True
         if self.commonknowledge:
             return True
+        try:
+            if self.commonknowledge:
+                return True
+            permissionlevel = self.permissions.get(grantedto=user)
+            if permissionlevel is not None:
+                return permissionlevel.accesslevel >= PERMISSION_LEVELS_DICTIONARY['View Only']
+        except Exception:
+            pass
         for section in self.wikisection_set.all():
             if section.viewable(user):
                 return True
@@ -188,6 +209,11 @@ class WikiPage(models.Model):
             result.append(sec.json())
         return result
 
+    def permission_list(self) -> list:
+        result = []
+        for perm in self.permissions.all():
+            result.append(perm.json())
+        return result
 
     def json(self):
         return {
@@ -199,7 +225,8 @@ class WikiPage(models.Model):
             'commonknowledge': self.commonknowledge,
             'title': self.title,
             'text': json.loads(self.text) if self.is_quill_content() else quill.quillify_text(self.text),
-            'sec': self.sections_list() 
+            'sec': self.sections_list(),
+            'perm': self.permission_list()
         }
 
     
@@ -270,7 +297,15 @@ class WikiPage(models.Model):
                         sections.append(WikiSection.fromjson(sec, result, commit=commit))
                 except Exception:
                     pass 
-            return {'page': result, 'sec':sections}
+            perms = []
+            if 'perm' in jsonobject:
+                try:
+                    from wiki.permissionpage import PermissionPage
+                    for perm in jsonobject['perm']:
+                        perms.append(PermissionPage.fromjson(perm, result, commit=commit))
+                except Exception:
+                    pass 
+            return {'page': result, 'sec':sections, 'perm': perms}
         except Exception as exc:
             print(exc)
             return None
