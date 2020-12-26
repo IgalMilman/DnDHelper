@@ -172,7 +172,6 @@ def handle_permissions_request_section(request:HttpRequest, wikipage:WikiPage)->
     sections = get_sections(request, wikipage)
     if sections is None:
         if request.method == 'POST':
-            print('Sending to page')
             return handle_permissions_request_page(request, wikipage)
         return None
     if request.method == 'GET':
