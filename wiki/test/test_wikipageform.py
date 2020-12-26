@@ -1,15 +1,19 @@
-from django.test import TestCase
-from wiki import wikipageform
-from wiki import wikipage
-from wiki.wikipage import WikiPage, Keywords
-from wiki.permissionsection import PermissionSection 
-from wiki.wikisection import WikiSection
-from django.contrib.auth.models import User
-from django.conf import settings
-import uuid, pytz, os
+import os
+import uuid
 from datetime import datetime, timedelta
-from dndhelper.widget import quill
+
 import mock
+import pytz
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import TestCase
+from dndhelper.widget import quill
+from wiki import wikipage, wikipageform
+from wiki.permissionpage import PermissionPage
+from wiki.permissionsection import PermissionSection
+from wiki.wikipage import Keywords, WikiPage
+from wiki.wikisection import WikiSection
+
 
 def render_mock(request, template, data, content_type='test'):
     return {'request':request, 'template':template, 'data': data, 'content_type':content_type}
@@ -51,12 +55,19 @@ class WikiPageFormTestCase(TestCase):
         self.createdtime = datetime.now(pytz.utc)
         self.wikiPages = []
         self.permissions = []
-        for i in range(2):
+        for i in range(3):
             self.wikiPages.append(WikiPage(unid=self.wikiuuid[i], createdon=self.createdtime, updatedon=self.createdtime, createdby=self.firstUser, updatedby=self.secondUser, title='testpage'+str(i+1)))
             self.wikiPages[i].save()
             self.wikiPages[i].createdon=self.createdtime + timedelta(hours=i)
             self.wikiPages[i].updatedon=self.createdtime + timedelta(hours=i)
             self.wikiPages[i].save()
+        self.pagepermissions = []
+        pagep = PermissionPage(createdby=self.firstUser, accesslevel=20, grantedto=self.thirdUser, wikipage=self.wikiPages[2])
+        pagep.save()
+        self.pagepermissions.append(pagep)
+        pagep = PermissionPage(createdby=self.firstUser, accesslevel=30, grantedto=self.fourthUser, wikipage=self.wikiPages[2])
+        pagep.save()
+        self.pagepermissions.append(pagep)
         self.wikiSections = []
         for i in range(3):
             self.wikiSections.append(WikiSection(unid=self.wikisuuid[i], createdon=self.createdtime, updatedon=self.createdtime, createdby=self.firstUser, updatedby=self.secondUser, title='testsec'+str(i+1), pageorder=i+1, text=self.wikistext[i], wikipage=self.wikiPages[0]))
@@ -82,7 +93,7 @@ class WikiPageFormTestCase(TestCase):
         wikipageform.redirect = mock.Mock(side_effect=redirect_mock)
         wikipageform.reverse = mock.Mock(side_effect=reverse_mock)
         wikipage.reverse = mock.Mock(side_effect=reverse_mock)
-        
+
 
     def test_wiki_page_form_get_request_super_user(self):
         post = {'action':'add'}
@@ -100,14 +111,12 @@ class WikiPageFormTestCase(TestCase):
         self.assertEqual(data['needquillinput'], True)
         self.assertIsInstance(data['form'], wikipageform.WikiPageForm)
         self.assertEqual(result['content_type'], self.contenttype)
-        
 
     def test_wiki_page_form_get_request_no_access(self):
         method = 'GET'
         request = req(method=method, user=self.thirdUser)
         result = wikipageform.WikiArticleFormParse(request)
         self.assertEqual(result, self.wikimainpagelink)
-        
 
     def test_wiki_page_form_get_request_no_permissions(self):
         method = 'GET'
@@ -131,7 +140,6 @@ class WikiPageFormTestCase(TestCase):
         self.assertEqual(data['needquillinput'], True)
         self.assertIsInstance(data['form'], wikipageform.WikiPageForm)
         self.assertEqual(result['content_type'], self.contenttype)
-
 
     def test_wiki_page_form_post_request_no_action_no_permissions(self):
         post = {}
@@ -206,26 +214,26 @@ class WikiPageFormTestCase(TestCase):
         self.assertEqual(data['form'].initial['title'], self.wikiPages[0].title)
         self.assertEqual(result['content_type'], self.contenttype)
 
-    # def test_wiki_page_form_change_request_success_permission(self):
-    #     post = {'action':'change', 'targetid': self.wikiPages[0].unid}
-    #     method = 'POST'
-    #     request = req(method=method, user=self.secondUser, post=post)
-    #     result = wikipageform.WikiArticleFormParse(request)
-    #     self.assertEqual(result['request'], request)
-    #     self.assertEqual(result['template'], self.formtemplate)
-    #     data = result['data']
-    #     self.assertEqual(data['action'], 'changed')
-    #     self.assertEqual(data['targetid'], self.wikiPages[0].unid)
-    #     self.assertEqual(data['PAGE_TITLE'], 'Post an article: ' + self.softwarename)
-    #     self.assertEqual(data['minititle'], 'Change Posted Article')
-    #     self.assertEqual(data['submbutton'], 'Change posted article')
-    #     self.assertEqual(data['deletebutton'], 'Delete article')
-    #     self.assertEqual(data['backurl'], self.wikipagelink)
-    #     self.assertEqual(data['needquillinput'], True)
-    #     self.assertIsInstance(data['form'], wikipageform.WikiArticleForm)
-    #     self.assertTrue('title' in data['form'].initial)
-    #     self.assertEqual(data['form'].initial['title'], self.wikiPages[0].title)
-    #     self.assertEqual(result['content_type'], self.contenttype)
+    def test_wiki_page_form_change_request_success_permission(self):
+        post = {'action':'change', 'targetid': self.wikiPages[2].unid}
+        method = 'POST'
+        request = req(method=method, user=self.fourthUser, post=post)
+        result = wikipageform.WikiArticleFormParse(request)
+        self.assertEqual(result['request'], request)
+        self.assertEqual(result['template'], self.formtemplate)
+        data = result['data']
+        self.assertEqual(data['action'], 'changed')
+        self.assertEqual(data['targetid'], self.wikiPages[2].unid)
+        self.assertEqual(data['PAGE_TITLE'], 'Post an article: ' + self.softwarename)
+        self.assertEqual(data['minititle'], 'Change Posted Article')
+        self.assertEqual(data['submbutton'], 'Change posted article')
+        self.assertEqual(data['deletebutton'], 'Delete article')
+        self.assertEqual(data['backurl'], self.wikipagelink)
+        self.assertEqual(data['needquillinput'], True)
+        self.assertIsInstance(data['form'], wikipageform.WikiPageForm)
+        self.assertTrue('title' in data['form'].initial)
+        self.assertEqual(data['form'].initial['title'], self.wikiPages[2].title)
+        self.assertEqual(result['content_type'], self.contenttype)
 
     def test_wiki_page_form_change_request_fail_no_access(self):
         post = {'action':'change', 'targetid': self.wikiPages[0].unid}
@@ -271,17 +279,17 @@ class WikiPageFormTestCase(TestCase):
         self.assertEqual(wiki.updatedby, self.firstUser)
         self.assertNotEqual(wiki.updatedon, wiki.createdon)
 
-    # def test_wiki_page_form_changed_request_success_permissions(self):
-    #     post = {'action':'changed', 'targetid': self.wikiPages[0].unid, 'title':'new title'}
-    #     method = 'POST'
-    #     request = req(method=method, user=self.secondUser, post=post)
-    #     result = wikipageform.WikiArticleFormParse(request)
-    #     self.assertEqual(result, self.wikipagelink)
-    #     wiki = WikiPage.objects.get(unid=self.wikiPages[0].unid)
-    #     self.assertEqual(wiki.title, 'new title')
-    #     self.assertEqual(wiki.createdby, self.firstUser)
-    #     self.assertEqual(wiki.updatedby, self.secondUser)
-    #     self.assertNotEqual(wiki.updatedon, wiki.createdon)
+    def test_wiki_page_form_changed_request_success_permissions(self):
+        post = {'action':'changed', 'targetid': self.wikiPages[2].unid, 'title':'new title'}
+        method = 'POST'
+        request = req(method=method, user=self.fourthUser, post=post)
+        result = wikipageform.WikiArticleFormParse(request)
+        self.assertEqual(result, self.wikipagelink)
+        wiki = WikiPage.objects.get(unid=self.wikiPages[2].unid)
+        self.assertEqual(wiki.title, 'new title')
+        self.assertEqual(wiki.createdby, self.firstUser)
+        self.assertEqual(wiki.updatedby, self.fourthUser)
+        self.assertNotEqual(wiki.updatedon, wiki.createdon)
 
     def test_wiki_page_form_changed_request_failed_no_access(self):
         post = {'action':'changed', 'targetid': self.wikiPages[0].unid, 'title':'new title'}
@@ -344,17 +352,17 @@ class WikiPageFormTestCase(TestCase):
             wiki=None
         self.assertIsNone(wiki)
 
-    # def test_wiki_page_form_delete_request_success_permission(self):
-    #     post = {'action':'delete', 'targetid':self.wikiPages[0].unid}
-    #     method = 'POST'
-    #     request = req(method=method, user=self.secondUser, post=post)
-    #     result = wikipageform.WikiArticleFormParse(request)
-    #     self.assertEqual(result, self.wikimainpagelink)
-    #     try:
-    #         wiki = WikiPage.objects.get(unid=self.wikiPages[0].unid)
-    #     except:
-    #         wiki=None
-    #     self.assertIsNone(wiki)
+    def test_wiki_page_form_delete_request_success_permission(self):
+        post = {'action':'delete', 'targetid':self.wikiPages[2].unid}
+        method = 'POST'
+        request = req(method=method, user=self.fourthUser, post=post)
+        result = wikipageform.WikiArticleFormParse(request)
+        self.assertEqual(result, self.wikimainpagelink)
+        try:
+            wiki = WikiPage.objects.get(unid=self.wikiPages[2].unid)
+        except:
+            wiki=None
+        self.assertIsNone(wiki)
 
     def test_wiki_page_form_delete_request_fail_no_access(self):
         post = {'action':'delete', 'targetid':self.wikiPages[0].unid}
@@ -383,7 +391,6 @@ class WikiPageFormTestCase(TestCase):
         request = req(method=method, user=self.firstUser, post=post)
         result = wikipageform.WikiArticleFormParse(request)
         self.assertEqual(result, self.wikimainpagelink)
-
 
     def test_wiki_page_viewable_super_user(self):
         self.assertTrue(self.wikiPages[0].viewable(self.firstUser))

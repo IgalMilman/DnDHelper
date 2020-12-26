@@ -16,8 +16,6 @@ from wiki import (modelgetters, wikiimportfile, wikipageform,
 from wiki.wikipage import WikiPage
 from wiki.wikisection import WikiSection
 
-# Create your views here.
-
 
 @login_required( login_url = 'login' )
 def wikiPageOpen(request, wikipageuuid):
@@ -34,7 +32,7 @@ def wikiPageOpen(request, wikipageuuid):
         data = {**data_section_form, **datawikipage}
     data['PAGE_TITLE'] = datawikipage['wiki_page'].title + ': ' + settings.SOFTWARE_NAME_SHORT
     data['built'] = datetime.now().strftime("%H:%M:%S")
-    data['needdatatables'] = False
+    data['needdatatables'] = True
     data['needquillinput'] = True
     return render(request, 'views/wikipage.html', data, content_type='text/html')
 
@@ -80,7 +78,7 @@ def wikiPermissionsAjaxRequestHandle(request, wikipageuuid):
     wikipage = wikipermissionsresponse.get_wiki_page(request, wikipageuuid)
     if wikipage is None:
         return JsonResponse({'status': 'failed', 'message': 'wiki page not found'}, status=404, safe=False)
-    data = wikipermissionsresponse.handle_permissions_request(request, wikipage)
+    data = wikipermissionsresponse.handle_permissions_request_section(request, wikipage)
     if data is None:
         return JsonResponse({'status': 'failed', 'message': 'error in the query'}, status=406, safe=False)
     return JsonResponse(data, status=200, safe=False)
