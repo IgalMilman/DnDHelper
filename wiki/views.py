@@ -34,7 +34,7 @@ def wikiPageOpen(request, wikipageuuid):
         data = {**data_section_form, **datawikipage}
     data['PAGE_TITLE'] = datawikipage['wiki_page'].title + ': ' + settings.SOFTWARE_NAME_SHORT
     data['built'] = datetime.now().strftime("%H:%M:%S")
-    data['needdatatables'] = False
+    data['needdatatables'] = True
     data['needquillinput'] = True
     return render(request, 'views/wikipage.html', data, content_type='text/html')
 

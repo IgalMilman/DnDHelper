@@ -1,0 +1,22 @@
+{% extends "_basewide.html" %}{% load static %} {% block extra_css %}{% endblock %}{% block extra_javascript %}
+<script src="{% static 'js/base/ajax.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'js/calendar/calendar_settings.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+{% endblock %}
+{% block body %}
+<div id='general-settings'>
+<h3>General Settings</h3>
+</div>
+<div id='months-settings'>
+<h3>Months Settings</h3>
+</div>
+<div id='weeks-settings'>
+<h3>Weeks Settings</h3>
+</div>
+<script>
+    document.calData=new CalendarData(undefined, undefined, "{% url 'calendar_settings_general' %}", 
+        document.getElementById('general-settings'),
+        document.getElementById('months-settings'),
+        document.getElementById('weeks-settings'));
+    document.calData.updateFromAjax("{% url 'calendar_settings_general' %}");
+</script>
+{% endblock %}

@@ -1,0 +1,1 @@
+from customcalendar.models import calendarsettings

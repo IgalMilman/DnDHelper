@@ -156,8 +156,6 @@ class Permission{
     }
 
     successfullySentInfo(data, status){
-        console.log(data);
-        console.log(status);
         Permission.object.button.classList.remove('alert');
         Permission.object.button.classList.add('success');
     }

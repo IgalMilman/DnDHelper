@@ -19,14 +19,16 @@ function dictToURI(dict) {
 }
 
 function sendGetAjax(link, data, success, failure, async = true) {
-    var fulllink = (' ' + link).slice(1);;
-    if (!fulllink.includes('?')){
-        fulllink = fulllink + '?'+dictToURI(data);
-    }
-    else{
-        if(!fulllink.endsWith('&'))
-            fulllink+='&';
-        fulllink+=dictToURI(data);            
+    var fulllink = (' ' + link).slice(1);
+    if(data !== undefined){
+        if (!fulllink.includes('?')){
+            fulllink = fulllink + '?'+dictToURI(data);
+        }
+        else{
+            if(!fulllink.endsWith('&'))
+                fulllink+='&';
+            fulllink+=dictToURI(data);            
+        }
     }
     $.ajax({
         type: "GET",

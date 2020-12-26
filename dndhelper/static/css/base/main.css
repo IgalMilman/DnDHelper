@@ -70,6 +70,18 @@ button.round,
     border-style: dotted;
 }
 
+.inputTable {
+    clear: both;
+    margin: 0.5em 0 !important;
+    max-width: none !important;
+    width: 100%;
+}
+
+.inputTable tr td{
+    padding-left:0.2rem;
+    padding-right:0.2rem;
+}
+
 .alert,
 .errorlist,
 .error {
