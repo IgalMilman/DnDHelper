@@ -553,9 +553,9 @@ class CalendarData{
         }
         date = this.FixMonth(date);
         if (date[0]>this._months[date[1]-1].NumberOfDays){
+            date[0] = date[0] - this._months[date[1]-1].NumberOfDays;
             date[1] += 1;
             date = this.FixMonth(date);
-            date[0] = date[0] - this._months[date[1]-1].NumberOfDays;
             return this.FixDate(date);
         }
         return date;

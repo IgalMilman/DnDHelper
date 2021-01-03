@@ -18,7 +18,7 @@ def get_calendar(calid:int=None)->CCalendar:
         logging.error(e)
     try:
         if cal is None:
-            cal = CCalendar(firstyear = 0)
+            cal = CCalendar(firstyear = 0, currentday=1, currentmonth=0, currentyear=0)
             cal.save()
     except Exception as e:
         logging.error('Failed to create new calendar: ' + str(e))
