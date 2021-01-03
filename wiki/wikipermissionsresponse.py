@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest
 from permissions import permissions_response
 
+from wiki.permissionpage import PermissionPage
 from wiki.permissionsection import PermissionSection
 from wiki.wikipage import WikiPage
 from wiki.wikisection import WikiSection
@@ -22,7 +23,7 @@ def get_sections(request:HttpRequest, wikipage: WikiPage) -> list:
     if targetid == 'all':
         result = wikipage.allpermissionable(request.user)
         if len(result)==0:
-            return None
+            return []
         else:
             return result 
     else:
@@ -64,16 +65,14 @@ def get_permissions_for_section(wikisection:WikiSection, allusers=None) -> list:
 
 def get_wiki_page(request:HttpRequest, wikipageuuid:uuid.UUID) -> WikiPage:
     try:
-        result = WikiPage.objects.all().get(unid=wikipageuuid)
+        result = WikiPage.objects.get(unid=wikipageuuid)
         if result is None:
             return None
-        #if result.permissionsable(request.user):
         return result
-        return None
     except Exception:
         return None
 
-def set_permissions(users:list, section:WikiSection, plevel:int, currentuser:User) -> int:
+def set_permissions_section(users:list, section:WikiSection, plevel:int, currentuser:User) -> int:
     if (users is None) or (section is None) or (currentuser is None):
         return -1
     if not section.permissionsable(currentuser):
@@ -104,44 +103,41 @@ def get_users(request:HttpRequest)->list:
             except:
                 return None
     return None
-        
 
-# def get_permissions_data(request:HttpRequest, wikipage: WikiPage) -> dict:
-#     sections = get_sections(request, wikipage)
-#     if sections is None:
-#         return None
-#     if request.method == 'GET':
-#         result = {
-#             'permlevels': permissions_response.get_permission_level_data()
-#         }
-#         sectionsdata = []
-#         allusers = get_all_users_data()
-#         for section in sections:
-#             sectiondata = {
-#                 'secid': section.unid,
-#                 'sectitle': section.title,
-#                 'secperm': get_permissions_for_section(section, allusers)
-#             }
-#             sectionsdata.append(sectiondata)
-#         result['sections'] = sectionsdata
-#         return result
-#     else:
-#         return None
+def get_permissions_for_page(wikipage:WikiPage, allusers=None) -> list:
+    if wikipage is None:
+        return None
+    if allusers is None:
+        allusers = get_all_users_data()
+    result = []
+    processed_users = set()
+    existintperms = wikipage.permissions.all()
+    if not (existintperms is None): 
+        for perm in existintperms:
+            result.append(permissions_response.get_permission_data(perm))
+            processed_users.add(perm.grantedto.get_full_name())
+    for user in allusers:
+        if not (user['grantedto']['fullname'] in processed_users):
+            result.append(user)
+    result = permissions_response.order_permission_data_list(result)
+    result.insert(0, permissions_response.get_permission_data_empty(User(username='all', first_name='All')))
+    return result
 
-def get_permissions_data(sections:list) -> dict:
+def get_permissions_data_section(sections:list) -> dict:
     if sections is None:
         return None
     result = {
         'permlevels': permissions_response.get_permission_level_data()
     }
     sectionsdata = []
+    allusers = get_all_users_data()
     if len(sections)>1:
+        result['page'] = get_permissions_for_page(sections[0].wikipage, allusers)
         sectionsdata.append({
             'secid': None,
             'sectitle': 'All',
             'secperm': get_permissions_for_section(WikiSection())
         })
-    allusers = get_all_users_data()
     for section in sections:
         sectiondata = {
             'secid': section.unid,
@@ -152,7 +148,7 @@ def get_permissions_data(sections:list) -> dict:
     result['sections'] = sectionsdata
     return result
 
-def set_permissions_request(request:HttpRequest, sections:list) -> dict:
+def set_permissions_request_section(request:HttpRequest, sections:list) -> dict:
     try:
         if not ('permissionlevel' in request.POST):
             return None
@@ -166,19 +162,62 @@ def set_permissions_request(request:HttpRequest, sections:list) -> dict:
             return None
         perm_count = 0
         for section in sections:
-            perm_count = perm_count + set_permissions(users, section, permlevel, request.user)
+            perm_count = perm_count + set_permissions_section(users, section, permlevel, request.user)
 
         return {'status': 'success', 'countcreated': perm_count, 'countneeded':len(sections)*len(users) }
     except Exception as err:
         return None
 
-def handle_permissions_request(request:HttpRequest, wikipage:WikiPage)->dict:
+def handle_permissions_request_section(request:HttpRequest, wikipage:WikiPage)->dict:
     sections = get_sections(request, wikipage)
     if sections is None:
+        if request.method == 'POST':
+            return handle_permissions_request_page(request, wikipage)
         return None
     if request.method == 'GET':
-        return get_permissions_data(sections)
+        return get_permissions_data_section(sections)
     if (request.method == 'POST') and ('action' in request.POST):
         if request.POST['action']=='setperm':
-            return set_permissions_request(request, sections)
+            return set_permissions_request_section(request, sections)
+    return None
+
+def set_permissions_page(users:list, page:WikiPage, plevel:int, currentuser:User) -> int:
+    if (users is None) or (page is None) or (currentuser is None):
+        return -1
+    if not page.permissionsable(currentuser):
+        return -1
+    result = 0
+    for user in users:
+        try:
+            perm = PermissionPage.get(user, page, currentuser)
+            if perm is None:
+                pass
+            perm.accesslevel = plevel
+            perm.save()
+            result = result + 1
+        except Exception:
+            pass
+    return result
+
+def set_permissions_request_page(request:HttpRequest, page:WikiPage) -> dict:
+    try:
+        if not ('permissionlevel' in request.POST):
+            return None
+        if page is None:
+            return None
+        permlevel = int(request.POST['permissionlevel'])
+        if not (isinstance(permlevel, int)):
+            return None 
+        users = get_users(request)
+        if users is None:
+            return None
+        perm_count = set_permissions_page(users, page, permlevel, request.user)
+        return {'status': 'success', 'countcreated': perm_count, 'countneeded':len(users) }
+    except Exception as err:
+        return None
+
+def handle_permissions_request_page(request:HttpRequest, wikipage:WikiPage)->dict:
+    if (request.method == 'POST') and ('action' in request.POST):
+        if request.POST['action']=='setperm':
+            return set_permissions_request_page(request, wikipage)
     return None

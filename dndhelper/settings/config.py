@@ -17,6 +17,7 @@ TIME_ZONE = "America/New_York"
 MEDIA_ROOT = os.path.join(os.path.abspath("."), "media")
 TEMP_FOLDER = os.path.join(os.getcwd(), "temp")
 WIKI_FILES = os.path.join(os.path.abspath("."), "uploads", "wiki")
+CALENDAR_EVENT_FOLDER = os.path.join(os.path.abspath("."), "uploads", "cal", "ev")
 WIKI_SECTION_FILES = os.path.join(os.path.abspath("."), "uploads", "sikisec")
 IMAGE_FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.ico', '.gif', '.bmp']
 VERSION_STATIC_FILES = False

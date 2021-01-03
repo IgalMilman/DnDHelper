@@ -16,8 +16,6 @@ from wiki import (modelgetters, wikiimportfile, wikipageform,
 from wiki.wikipage import WikiPage
 from wiki.wikisection import WikiSection
 
-# Create your views here.
-
 
 @login_required( login_url = 'login' )
 def wikiPageOpen(request, wikipageuuid):
@@ -80,7 +78,7 @@ def wikiPermissionsAjaxRequestHandle(request, wikipageuuid):
     wikipage = wikipermissionsresponse.get_wiki_page(request, wikipageuuid)
     if wikipage is None:
         return JsonResponse({'status': 'failed', 'message': 'wiki page not found'}, status=404, safe=False)
-    data = wikipermissionsresponse.handle_permissions_request(request, wikipage)
+    data = wikipermissionsresponse.handle_permissions_request_section(request, wikipage)
     if data is None:
         return JsonResponse({'status': 'failed', 'message': 'error in the query'}, status=406, safe=False)
     return JsonResponse(data, status=200, safe=False)
@@ -141,8 +139,6 @@ def wikiPageFile(request, wikipageuuid, filename):
     if filecontent is None:
         return HttpResponseNotFound("File was not found")
     response = HttpResponse(filecontent, content_type=guess_type(filename)[0])
-    #response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
-    #response['X-Sendfile'] = smart_str(filename)
     return response
 
 

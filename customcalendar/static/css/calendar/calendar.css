@@ -1,0 +1,70 @@
+.calendar-wrapper {
+    margin-left:0.5rem;
+    margin-right:0.5rem;
+}
+
+.calendar {
+    display: grid;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.calendar-day{
+    border-left: 1px;
+    border-right: 1px;
+    border-top: 1px;
+    border-bottom: 1px;
+    border-style:ridge;
+    border-color: #000;
+    border-collapse: collapse;
+    border-radius: 1px;
+}
+
+.calendar-daynames{
+    text-decoration: underline;
+    font-weight: bold;
+    border-left: 0px;
+    border-right: 0px;
+    border-top: 0px;
+}
+
+.calendar-list li {
+    padding: 2px;
+}
+
+.calendar-controller-form input{
+    width:25%;
+    display: inline-block;
+}
+
+.calendar-controller-form select{
+    width: 40%;
+    display: inline-block;
+}
+
+.calendar-sticky {
+    position: fixed;
+    background: white;
+    width: 100%;
+    max-width: 1250px;
+    margin: auto;
+    padding-top: 1rem;
+    top: 0;
+}
+
+.calendar-sticky + .calendar-body {
+    padding-top: 102px;
+}
+
+@media screen and (max-width: 60em) {
+    .calendar-sticky {
+        position: inherit;
+        background: inherit;
+    }
+
+    .calendar-sticky + .calendar-body {
+        padding-top: inherit;
+    }
+}

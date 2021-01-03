@@ -1,4 +1,4 @@
-function sendPostAjax(link, data, success, failure, async = true) {
+function sendPostAjax(link, data, success, failure, async = true, context=undefined) {
     data['csrfmiddlewaretoken'] = my_crsf_token;
     $.ajax({
         type: "POST",
@@ -6,7 +6,8 @@ function sendPostAjax(link, data, success, failure, async = true) {
         data: data,
         success: success,
         failure: failure,
-        async: async
+        async: async,
+        context: context
     })
 }
 
@@ -18,21 +19,24 @@ function dictToURI(dict) {
     return str.join("&");
 }
 
-function sendGetAjax(link, data, success, failure, async = true) {
-    var fulllink = (' ' + link).slice(1);;
-    if (!fulllink.includes('?')){
-        fulllink = fulllink + '?'+dictToURI(data);
-    }
-    else{
-        if(!fulllink.endsWith('&'))
-            fulllink+='&';
-        fulllink+=dictToURI(data);            
+function sendGetAjax(link, data, success, failure, async = true, context=undefined) {
+    var fulllink = (' ' + link).slice(1);
+    if(data !== undefined){
+        if (!fulllink.includes('?')){
+            fulllink = fulllink + '?'+dictToURI(data);
+        }
+        else{
+            if(!fulllink.endsWith('&'))
+                fulllink+='&';
+            fulllink+=dictToURI(data);            
+        }
     }
     $.ajax({
         type: "GET",
         url: fulllink,
         success: success,
         failure: failure,
-        async: async
+        async: async,
+        context: context
     })
 }

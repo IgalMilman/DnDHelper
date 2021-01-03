@@ -16,27 +16,32 @@ from dndhelper.widget import quill
 from permissions.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
 
 
+def time_now(instance=None):
+    return datetime.now(pytz.utc)
 
-class Keywords(models.Model):
-    word = models.CharField('Word', max_length=120, null=False, blank=False)
+EVENT_TYPES_DICTIONARY = {"History event":0, "Holiday":10, "Party event": 20, "Personal event": 30}
+EVENT_TYPES_NUMBER_DICTIONARY = {0:"History event", 10:"Holiday", 20:"Party event", 30:"Personal event"}
+EVENT_TYPES_TUPLES = [(0, "History event"), (10, "Holiday"), (20, "Party event"), (30, "Personal event")]
 
-
-class WikiPage(models.Model):
+class CEvent(models.Model):
     unid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    eventday = models.IntegerField(verbose_name='Event Day', null=False, blank=False)
+    eventmonth = models.IntegerField(verbose_name='Event Month', null=False, blank=False)
+    eventyear = models.IntegerField(verbose_name='Event Year', null=False, blank=False)
     createdon = models.DateTimeField("Created time", auto_now_add=True, null=False, blank=False)
     updatedon = models.DateTimeField("Updated time", auto_now_add=True, null=False, blank=False)
-    createdby = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="Created by", null=True, blank=True, related_name='createdwikiarticles')
-    updatedby = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="Updated by", null=True, blank=True, related_name='lastupdatedwikiarticles')
+    createdby = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="Created by", null=True, blank=True, related_name='createdcalendarevents')
+    updatedby = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="Updated by", null=True, blank=True, related_name='lastupdatedcalendarevents')
     commonknowledge = models.BooleanField("Is common knowledge?", default=False)
+    eventtype = models.IntegerField("Event Types", choices=EVENT_TYPES_TUPLES, null=False, blank=False, default=0)
     title = models.CharField("Title*", max_length=160, null=False, blank=False)
-    keywords = models.ManyToManyField("Keywords", verbose_name="Keywords")
     text = models.TextField("Article text", null=True, blank=True)
 
     def save(self, *args, **kwargs):
         folder = self.get_files_folder()
         if folder is not None:
             self.text = quill.save_images_from_quill(self.text, folder, self.get_files_link())
-        super(WikiPage, self).save(*args, **kwargs)
+        super(CEvent, self).save(*args, **kwargs)
 
     def createtime(self) -> datetime:
         return self.createdon.astimezone(pytz.timezone('America/New_York'))
@@ -53,9 +58,15 @@ class WikiPage(models.Model):
         if (self.updatedby is None):
             return None
         return self.updatedby.get_full_name()
+
+    def date_hash(self)->str:
+        return str(self.eventyear) + '-' + str(self.eventmonth) + '-' + str(self.eventday)
+
+    def get_date(self)->str:
+        return str(self.eventyear) + '-' + str(self.eventmonth) + '-' + str(self.eventday)
     
     def __str__(self) -> str:
-        return "Wiki title: " + str(self.title) + ". UNID: " + str(self.unid)
+        return "Calendar event: " + str(self.title) + ". UNID: " + str(self.unid)
 
     def is_quill_content(self) -> bool:
         if self.text is None:
@@ -87,7 +98,7 @@ class WikiPage(models.Model):
 
     def get_files_folder(self) -> str:
         try:
-            folder_path = os.path.join(settings.WIKI_FILES, str(self.unid))
+            folder_path = os.path.join(settings.CALENDAR_EVENT_FOLDER, str(self.unid))
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
             return folder_path
@@ -96,12 +107,18 @@ class WikiPage(models.Model):
        
     def generate_link(self) -> str:
         return self.get_link()
-       
+
     def get_link(self) -> str:
-        return reverse('wiki_page', kwargs={'wikipageuuid': self.unid})
+        return reverse('calendar_event_page', kwargs={'ceventuuid': self.unid})
+
+    def get_link_calendar(self) -> str:
+        return reverse('calendar_homepage') + '#' + self.date_hash()
+       
+    def get_data_link(self) -> str:
+        return reverse('calendar_event_api', kwargs={'ceventuuid': self.unid})
        
     def get_files_link(self) -> str:
-        return reverse('wiki_page_file_empty', kwargs={'wikipageuuid': self.unid})
+        return reverse('calendar_event_page_file_empty', kwargs={'ceventuuid': self.unid})
 
     def anchor_id(self) -> str:
         return 'a'+str(self.unid)
@@ -153,58 +170,7 @@ class WikiPage(models.Model):
                 return permissionlevel.accesslevel >= PERMISSION_LEVELS_DICTIONARY['View Only']
         except Exception:
             pass
-        for section in self.wikisection_set.all():
-            if section.viewable(user):
-                return True
         return False
-
-    def allviewable(self, user: User) -> list:
-        if user is None:
-            user = get_current_user()
-        if user is None:
-            return []
-        allsections =  self.wikisection_set.all().order_by('pageorder')
-        if user.is_superuser:
-            return list(allsections)
-        sect = []
-        for section in allsections:
-            if section.viewable(user):
-                sect.append(section)
-        return sect
-
-    def alleditable(self, user: User) -> list:
-        if user is None:
-            user = get_current_user()
-        if user is None:
-            return []
-        allsections =  self.wikisection_set.all().order_by('pageorder')
-        if user.is_superuser:
-            return list(allsections)
-        sect = []
-        for section in allsections:
-            if section.editable(user):
-                sect.append(section)
-        return sect
-
-    def allpermissionable(self, user: User) -> list:
-        if user is None:
-            user = get_current_user()
-        if user is None:
-            return []
-        allsections =  self.wikisection_set.all().order_by('pageorder')
-        if user.is_superuser:
-            return list(allsections)
-        sect = []
-        for section in allsections:
-            if section.permissionsable(user):
-                sect.append(section)
-        return sect
-
-    def sections_list(self)->list:
-        result = []
-        for sec in self.wikisection_set.all():
-            result.append(sec.json())
-        return result
 
     def permission_list(self) -> list:
         result = []
@@ -221,15 +187,39 @@ class WikiPage(models.Model):
             'updatedby': self.updatedby.get_username() if self.updatedby is not None else None,
             'commonknowledge': self.commonknowledge,
             'title': self.title,
+            'year': self.eventyear,
+            'month': self.eventmonth,
+            'day': self.eventday,
             'text': json.loads(self.text) if self.is_quill_content() else quill.quillify_text(self.text),
-            'sec': self.sections_list(),
             'perm': self.permission_list()
         }
 
+    def shortjson(self):
+        return {
+            'unid': str(self.unid),
+            'title': self.title,
+            'year': self.eventyear,
+            'month': self.eventmonth,
+            'day': self.eventday,
+            'apilink': self.get_data_link(),
+            'directlink': self.get_link()
+        }
+
+    def jsondata(self):
+        return {
+            'unid': str(self.unid),
+            'title': self.title,
+            'year': self.eventyear,
+            'month': self.eventmonth,
+            'day': self.eventday,
+            'text': self.get_quill_content(),
+            'apilink': self.get_data_link(),
+            'directlink': self.get_link()
+        }
     
     @staticmethod
     def fromjson(jsonobject:dict, commit:bool = False, override:bool = False):
-        result = WikiPage()
+        result = CEvent()
         if not ('title' in jsonobject):
             return None
         tmp = None
@@ -237,7 +227,7 @@ class WikiPage(models.Model):
             try:
                 result.unid = uuid.UUID(jsonobject['unid'])
                 try:
-                    tmp = WikiPage.objects.get(unid = result.unid)
+                    tmp = CEvent.objects.get(unid = result.unid)
                     if (tmp is not None) and not override:
                         return None
                 except Exception:
@@ -286,40 +276,56 @@ class WikiPage(models.Model):
                 if tmp is not None:
                     tmp.delete()
                 result.save()
-            sections = []
-            if 'sec' in jsonobject:
-                try:
-                    from wiki.wikisection import WikiSection
-                    for sec in jsonobject['sec']:
-                        sections.append(WikiSection.fromjson(sec, result, commit=commit))
-                except Exception:
-                    pass 
             perms = []
             if 'perm' in jsonobject:
                 try:
-                    from wiki.permissionpage import PermissionPage
+                    from customcalendar.models.permissionevent import PermissionCEvent
                     for perm in jsonobject['perm']:
-                        perms.append(PermissionPage.fromjson(perm, result, commit=commit))
+                        perms.append(PermissionCEvent.fromjson(perm, result, commit=commit))
                 except Exception:
                     pass 
-            return {'page': result, 'sec':sections, 'perm': perms}
+            return {'event': result, 'perm': perms}
         except Exception as exc:
             return None
         return None
-    
+
     @staticmethod
-    def cancreate(user):
+    def cancreate(user:User)->bool:
         if user is None:
             user = get_current_user()
         if user is None:
             return False
-        return user.is_superuser
+        #return user.is_superuser
+        return True
 
-    # def is_quill_content(self):
-    #     return quill.check_quill_string(self.description)
+    @staticmethod
+    def create_types(user:User, event=None)->list:
+        if user is None:
+            user = get_current_user()
+        if user is None:
+            return False
+        if user.is_superuser:
+            return EVENT_TYPES_TUPLES
+        if event is None:
+            return EVENT_TYPES_TUPLES[2:]
+        else:
+            result = EVENT_TYPES_TUPLES[2:]
+            for i in EVENT_TYPES_TUPLES:
+                if i[0] == event.eventtype:
+                    result = [i]+result
+                    return result
+            return result
+        
 
-    # def get_quill_content(self):
-    #     return quill.get_quill_text(self.description)
-
-    # def get_content(self):
-    #     return self.description
+    @staticmethod
+    def get_all_year_events(year:int, user:User)->list:
+        if user is None:
+            user = get_current_user()
+        if user is None:
+            return []
+        allevents = CEvent.objects.filter(eventyear=year)
+        result = []
+        for event in allevents:
+            if event.viewable(user):
+                result.append(event)
+        return result

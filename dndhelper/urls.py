@@ -29,6 +29,7 @@ urlpatterns = [
     path('', dndhelper_views.homepage, name='homepage'),
     path('', dndhelper_views.homepage, name=''),
     path('wiki/', include('wiki.urls')),
+    path('calendar/', include('customcalendar.urls')),
     path('me', dndhelper_views.userpersonalpage, name='personal_page'),
     path('me/change/', dndhelper_views.changeuserpage, name='change_user'),
     path('accounts/password_reset/', auth_views.PasswordResetView.as_view(form_class=dndhelper_loginform.my_reset_password_form, 

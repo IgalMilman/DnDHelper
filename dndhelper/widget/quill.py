@@ -8,6 +8,7 @@ from mimetypes import guess_extension, guess_type
 
 from django import forms, template
 from django.db import models
+from django.urls import resolve, reverse
 from dndhelper.quill_delta_to_html import quill_to_html
 
 
@@ -35,7 +36,7 @@ class QuillWidget(forms.Textarea):
             except Exception:
                 filelink = None
         if 'value' in context['widget']:
-            context['widget']['quill_object']=QuillObject(context['widget']['value'], filelink)
+            context['widget']['quill_object']=QuillObject(context['widget']['value'], filelink, clean=True)
         return context
 
 
@@ -56,12 +57,34 @@ def check_quill_string(inputstr):
     except Exception:
         return False
 
-def get_quill_string(inputstr)->dict:
+def get_quill_string(inputstr)->str:
     try:
-        if isinstance(inputstr, dict):
-            return json.dumps(inputstr)
-        a=json.loads(inputstr)
-        return inputstr
+        quilldict = get_quill_value(inputstr)
+        if not isinstance(quilldict, dict):
+            return None
+        for operation in quilldict['ops']:
+            if 'insert' in operation:
+                if isinstance(operation['insert'], dict):
+                    try:
+                        if 'image' in operation['insert']:
+                            try:
+                                if isinstance(operation['insert']['image'], dict):
+                                    operation['insert']['image'] = reverse(operation['insert']['image']['name'], 
+                                        kwargs=operation['insert']['image']['kwargs'])
+                            except Exception as err:
+                                logging.error(err)
+                    except:
+                        pass
+            if 'attributes' in operation:
+                if 'link' in operation['attributes']:
+                    try:
+                        if isinstance(operation['attributes']['link'], dict):
+                            operation['attributes']['link'] = reverse(operation['attributes']['link']['name'], 
+                                kwargs=operation['attributes']['link']['kwargs'])
+                    except Exception as err:
+                        logging.error(err)
+
+        return json.dumps(quilldict)
     except Exception:
         return inputstr
 
@@ -124,7 +147,7 @@ def save_image(image:str, filepath:str)->str:
         return image
 
 
-def save_images_from_quill(inputstr, filepath:str)->dict:
+def save_images_from_quill(inputstr, filepath:str, link:str='')->dict:
     if inputstr is None:
         return inputstr
     quilldict = get_quill_value(inputstr)
@@ -135,9 +158,29 @@ def save_images_from_quill(inputstr, filepath:str)->dict:
             if isinstance(operation['insert'], dict):
                 try:
                     if 'image' in operation['insert']:
-                        operation['insert']['image'] = save_image(operation['insert']['image'], filepath)
+                        try:
+                            try:
+                                tmp = resolve(save_image(operation['insert']['image'], filepath))
+                            except Exception:
+                                tmp = resolve(link+save_image(operation['insert']['image'], filepath))
+                            kwargs = {}
+                            for par in tmp.kwargs:
+                                kwargs[par] = str(tmp.kwargs[par])
+                            operation['insert']['image'] = {'kwargs': kwargs, 'name': tmp.url_name}
+                        except Exception as err:
+                            logging.error(err)
                 except:
                     pass
+        if 'attributes' in operation:
+            if 'link' in operation['attributes']:
+                try:
+                    tmp = resolve(operation['attributes']['link'])
+                    kwargs = {}
+                    for par in tmp.kwargs:
+                        kwargs[par] = str(tmp.kwargs[par])
+                    operation['attributes']['link'] = {'kwargs': kwargs, 'name': tmp.url_name}
+                except Exception as err:
+                    logging.error(err)
     if type(quilldict) == type(inputstr):
         return quilldict
     return json.dumps(quilldict)
@@ -206,9 +249,10 @@ def get_quill_text_simple(inputstr, number_of_lines:int=1):
 
 
 class QuillObject():
-    def __init__(self, text="", filelink=None):
+    def __init__(self, text="", filelink=None, clean=False):
         self.text=text
         self.filelink = filelink
+        self.clean = clean
 
     def is_quill_content(self):
         return check_quill_string(self.text)

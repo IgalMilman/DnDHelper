@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'permissions',
     'wiki',
     'datamanagement',
+    'customcalendar',
 ]
 
 MIDDLEWARE = [
