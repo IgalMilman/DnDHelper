@@ -22,6 +22,7 @@ urlpatterns = [
     path('event/<uuid:ceventuuid>', calendar_views.calendarEventPage, name='calendar_event_page'),
     path('event/<uuid:ceventuuid>/perm', calendar_views.eventPermissionsAjaxRequestHandle, name='calendar_event_perm'),
     path('event/edit', calendar_views.calendarEventPageForm, name='calendar_event_form_page'),
+    path('events', calendar_views.calendarAllEventsPage, name='calendar_events_table_page'),
     path('events/<int:year>', calendar_views.calendarAllEventsAPI, name='calendar_all_events'),
     path('a/event/<uuid:ceventuuid>', calendar_views.calendarEventPageAPI, name='calendar_event_api'),
     path('event/<uuid:ceventuuid>/f/', calendar_views.calendarHomePage, name='calendar_event_page_file_empty'),

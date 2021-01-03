@@ -1,5 +1,6 @@
 import logging
 
+from crum import get_current_user
 from customcalendar.models.calendarsettings import (CCalendar, CMonth, CWeek,
                                                     CWeekDay)
 from customcalendar.models.calendarevent import CEvent
@@ -121,3 +122,16 @@ def get_one_year_events(year:int, user:User) -> list:
     except Exception as err:
         logging.error(err)
         return []
+
+def get_all_events(user:User=None)->list:
+    try:
+        if user is None:
+            user = get_current_user()
+        result = []
+        events = CEvent.objects.all().order_by('-createdon')
+        for event in events:
+            if (event.viewable(user)):
+                result.append(event)
+    except Exception as err:
+        return None
+    return {'all_events': result}

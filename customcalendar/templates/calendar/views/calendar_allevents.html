@@ -1,0 +1,37 @@
+{% extends "_basewide.html" %} {% load static %} {% block extra_css %}{% endblock %}{% block extra_javascript %} {% endblock %} {% block body %}
+<h2>Events</h2>
+<table id='eventtable'>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in all_events %} {% include "calendar/views/oneitemrow/eventrow.html" with event=event %} {% endfor %}
+    </tbody>
+</table>
+{% if create_events %}
+<div class="row align-middle" data-equalizer>
+    <div class='columns'></div>
+    <div class="columns small-9 middle-7 large-5 text-middle" data-equalizer-watch>
+        <a href="{% url 'calendar_event_form_page' %}" class="button round centered-block-element">Create new event</a><br>
+        {% comment %} <a href="{% url 'wiki_import' %}" class="button round centered-block-element">Import an article</a> {% endcomment %}
+    </div>
+    <div class='columns'></div>
+</div>
+{% endif %}
+{% if needdatatables %}
+<script>
+    $(document).ready(function() {
+        $('#eventtable').DataTable({
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+            "iDisplayLength": 25,
+            "bSort" : true,
+            "order": []
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

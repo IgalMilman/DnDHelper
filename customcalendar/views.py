@@ -34,7 +34,20 @@ def calendarHomePage(request):
     data['built'] = datetime.now().strftime("%H:%M:%S")
     data['needdatatables'] = True
     data['needquillinput'] = False
-    return render(request, 'views/calendar.html', data, content_type='text/html')
+    return render(request, 'calendar/views/calendar.html', data, content_type='text/html')
+
+@login_required( login_url = 'login' )
+def calendarAllEventsPage(request):
+    valid, response = main_views.initRequest(request)
+    if not valid:
+        return response
+    data = modelgetters.get_all_events(request.user)
+    data['create_events'] = CEvent.cancreate(request.user)
+    data['PAGE_TITLE'] = 'Calendar all events: ' + settings.SOFTWARE_NAME_SHORT
+    data['built'] = datetime.now().strftime("%H:%M:%S")
+    data['needdatatables'] = True
+    data['needquillinput'] = False
+    return render(request, 'calendar/views/calendar_allevents.html', data, content_type='text/html')
 
 @login_required( login_url = 'login' )
 def calendarEventPage(request, ceventuuid):
@@ -48,7 +61,7 @@ def calendarEventPage(request, ceventuuid):
     data['built'] = datetime.now().strftime("%H:%M:%S")
     data['needdatatables'] = True
     data['needquillinput'] = True
-    return render(request, 'views/calendar_event.html', data, content_type='text/html')
+    return render(request, 'calendar/views/calendar_event.html', data, content_type='text/html')
 
 @login_required( login_url = 'login' )
 def calendarEventPageAPI(request, ceventuuid):
@@ -108,7 +121,7 @@ def calendarSettingsPage(request):
     data['built'] = datetime.now().strftime("%H:%M:%S")
     data['needdatatables'] = True
     data['needquillinput'] = False
-    return render(request, 'views/calendar_settings.html', data, content_type='text/html')
+    return render(request, 'calendar/views/calendar_settings.html', data, content_type='text/html')
 
 @login_required( login_url = 'login' )
 def calendarSettingsGeneralAjaxRequest(request):
