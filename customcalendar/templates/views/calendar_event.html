@@ -1,0 +1,33 @@
+{% extends "_basewide.html" %}{% load static %} {% block extra_css %}{% endblock %}{% block extra_javascript %}
+<script src="{% static 'js/base/ajax.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'js/permissions.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'js/base/dialogs.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+{% endblock %}
+{% block body %}
+<div class="post-bordered">
+<div class="row">
+    <div class="columns text-left"><a id="{{ event.anchor_id }}"></a><h3>{{ event.title }}</h3>
+    <p><a href="{{ event.get_link_calendar }}">{{ event.get_date }}</a></p>
+    {% include "forms/widget/maybequill.html" with obj=event %}
+</div>
+    {% if event.editable  %}
+    <div class="columns text-right"><b>Created on:</b> {{ event.createtime|date:"Y-m-d h:i a" }}<br>
+    <b>Updated on:</b> {{ event.updatetime|date:"Y-m-d h:i a" }}<br>
+<b>Created by:</b> {{ event.createuser }}<br>
+<b>Updated by:</b> {{ event.updateuser }}
+    <form action="{% url 'calendar_event_form_page' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change">
+            <input type="hidden" name="targetid" value="{{ event.unid }}">
+            <a id="event-page-id-change-{{ event.unid }}" class="button round inlineblock" onclick="this.parentElement.submit();">Edit Page</a>
+    </form>
+    {% comment %} <a id="wikipage-id-change-permission-{{ event.unid }}" class="button round inlineblock" href="{% url 'event_export' wikipageuuid=event.unid %}">Export this page</a><br> {% endcomment %}
+{% if event.permissionsable %}
+        <a id="eventpage-id-change-permission-{{ event.unid }}" class="button round inlineblock" onclick="var p = new PermissionPopup('{% url 'calendar_event_perm' ceventuuid=event.unid %}');p.Activate();">Change Permissions</a>
+{% endif %}</div>{% else %} 
+    {% if event.permissionsable %}
+        <div class="columns text-right"><a id="wikipage-id-change-permission-{{ event.unid }}" class="button round inlineblock" onclick="var p = new PermissionPopup('{% url 'calendar_event_perm' ceventuuid=event.unid %}');p.Activate();">Change Permissions</a></div>
+{% endif %}{% endif %}
+</div>
+</div>
+{% endblock %}

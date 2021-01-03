@@ -12,13 +12,10 @@ from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
-from dndhelper import sendemail as emailsending
 from dndhelper.widget import quill
 from permissions.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
 
 
-def time_now(instance=None):
-    return datetime.now(pytz.utc)
 
 class Keywords(models.Model):
     word = models.CharField('Word', max_length=120, null=False, blank=False)
@@ -38,7 +35,7 @@ class WikiPage(models.Model):
     def save(self, *args, **kwargs):
         folder = self.get_files_folder()
         if folder is not None:
-            self.text = quill.save_images_from_quill(self.text, folder)
+            self.text = quill.save_images_from_quill(self.text, folder, self.get_files_link())
         super(WikiPage, self).save(*args, **kwargs)
 
     def createtime(self) -> datetime:
@@ -307,7 +304,6 @@ class WikiPage(models.Model):
                     pass 
             return {'page': result, 'sec':sections, 'perm': perms}
         except Exception as exc:
-            print(exc)
             return None
         return None
     

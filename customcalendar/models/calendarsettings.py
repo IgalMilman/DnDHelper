@@ -43,7 +43,11 @@ class CCalendar(models.Model):
             return week
         return self.week
 
-    def full_data(self):
+    def full_data_perm(self)->dict:
+        result = self.full_data()
+        return result
+
+    def full_data(self)->dict:
         result = self.short_data()
         result['months'] = []
         for month in self.months.all():
@@ -51,7 +55,7 @@ class CCalendar(models.Model):
         result['week'] = self.get_week().full_data()
         return result
     
-    def short_data(self):
+    def short_data(self)->dict:
         return {
             'firstyear': self.firstyear,
             'curday': self.currentday,
@@ -62,9 +66,18 @@ class CCalendar(models.Model):
             'mpy': self.number_of_month_year(),
             'id': self.id,
         }
+
+    def months_array(self)->list:
+        result = []
+        for month in self.months.all().order_by('monthnumber'):
+            result.append(month.as_tuple())
+        return result
+
     
     @staticmethod
-    def canedit(user:User):
+    def canedit(user:User)->bool:
+        if user is None:
+            user = get_current_user()
         if user is None:
             return False
         return user.is_superuser
@@ -74,6 +87,9 @@ class CMonth(models.Model):
     monthnumber = models.IntegerField(verbose_name='Month number')
     monthname = models.CharField(verbose_name='Month name:', null=False, blank=False, max_length=30)
     calendar = models.ForeignKey(CCalendar, on_delete=models.CASCADE, verbose_name="Calendar settings", null=False, blank=False, related_name='months')
+
+    def as_tuple(self):
+        return (self.monthnumber, self.monthname)
 
     def full_data(self):
         result = self.short_data()

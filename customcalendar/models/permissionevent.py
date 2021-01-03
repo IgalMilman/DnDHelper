@@ -13,14 +13,14 @@ from django.db import models
 from django.urls import reverse
 from permissions import permissions
 
-from wiki.wikipage import WikiPage
+from customcalendar.models.calendarevent import CEvent
 
 
 def time_now(instance=None):
     return datetime.now(pytz.utc)
 
-class PermissionPage(permissions.Permission):
-    wikipage = models.ForeignKey(WikiPage, on_delete=models.CASCADE, null=False, blank=False, related_name='permissions')
+class PermissionCEvent(permissions.Permission):
+    event = models.ForeignKey(CEvent, on_delete=models.CASCADE, null=False, blank=False, related_name='permissions')
 
     def json(self) -> dict:
         return {
@@ -28,25 +28,25 @@ class PermissionPage(permissions.Permission):
             'createdon': self.createdon.isoformat(),
             'createdby': self.createdby.get_username() if self.createdby is not None else None,
             'permlevel': self.accesslevel,
-            'wikipage': str(self.wikipage.unid)
+            'event': str(self.event.unid)
         }
 
     @staticmethod
-    def get(user:User, wikipage:WikiPage, currentuser:User):
+    def get(user:User, event:CEvent, currentuser:User):
         try: 
-            if not wikipage.permissionsable(currentuser):
+            if not event.permissionsable(currentuser):
                 return None
-            result = PermissionPage.objects.get(grantedto=user, wikipage = wikipage)
+            result = PermissionCEvent.objects.get(grantedto=user, event = event)
             if not (result is None):
                 return result
         except Exception:
             pass
-        return PermissionPage(createdby=currentuser, grantedto=user, wikipage=wikipage)
+        return PermissionCEvent(createdby=currentuser, grantedto=user, event=event)
 
     @staticmethod
-    def fromjson(jsonobj:dict, wikipage:WikiPage, commit:bool=False):
+    def fromjson(jsonobj:dict, event:CEvent, commit:bool=False):
         try: 
-            if wikipage is None:
+            if event is None:
                 return None
             if not 'grantedto' in jsonobj:
                 return None
@@ -67,7 +67,7 @@ class PermissionPage(permissions.Permission):
                     crby = user
                 except Exception:
                     pass
-            result = PermissionPage.get(grto, wikipage, crby)
+            result = PermissionCEvent.get(grto, event, crby)
             result.accesslevel = perml
             if commit:
                 result.save()

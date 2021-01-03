@@ -2,8 +2,10 @@ import logging
 
 from customcalendar.models.calendarsettings import (CCalendar, CMonth, CWeek,
                                                     CWeekDay)
+from customcalendar.models.calendarevent import CEvent
+from django.contrib.auth.models import User
 
-def get_calendar(calid:int=None):
+def get_calendar(calid:int=None)->CCalendar:
     cal = None
     try:
         if calid is None:
@@ -22,13 +24,19 @@ def get_calendar(calid:int=None):
         logging.error('Failed to create new calendar: ' + str(e))
     return cal
 
-def get_calendar_settings(calid:int=None):
+def get_calendar_settings(calid:int=None, user:User=None)->dict:
     cal = get_calendar(calid=calid)
     if cal is None:
         return None
-    return cal.full_data()
+    tmp = cal.full_data()
+    try:
+        tmp['editable'] = CCalendar.canedit(user)
+    except Exception as exc:
+        logging.error(exc)
+    return tmp
 
-def get_month_settings(calid:int=None, monthid:int=None):
+
+def get_month_settings(calid:int=None, monthid:int=None)->dict:
     cal = get_calendar(calid=calid)
     if cal is None:
         return None
@@ -46,7 +54,7 @@ def get_month_settings(calid:int=None, monthid:int=None):
         return None
     return month.full_data()
 
-def get_week_settings(calid:int=None):
+def get_week_settings(calid:int=None)->dict:
     cal = get_calendar(calid=calid)
     if cal is None:
         return None
@@ -55,7 +63,7 @@ def get_week_settings(calid:int=None):
         return None
     return week.full_data()
 
-def get_week_day_settings(calid:int=None, weekdayid:int=None):
+def get_week_day_settings(calid:int=None, weekdayid:int=None)->dict:
     if weekdayid is None:
         return None
     cal = get_calendar(calid=calid)
@@ -72,3 +80,44 @@ def get_week_day_settings(calid:int=None, weekdayid:int=None):
     if weekday is None:
         return None
     return weekday.full_data()
+
+def get_one_event_page_data_api(ceventuuid, user)->dict:
+    try:
+        event = CEvent.objects.get(unid=ceventuuid)
+        if (event is None):
+            return None
+        if (not event.viewable(user)):
+            return None
+        data={}
+        res = event.jsondata()
+        res['editable'] = event.editable(user)
+        data['event'] = res
+        return data
+    except Exception as err:
+        logging.error(err)
+        return None
+
+def get_one_event_page_data(ceventuuid, user)->dict:
+    try:
+        event = CEvent.objects.get(unid=ceventuuid)
+        if (event is None):
+            return None
+        if (not event.viewable(user)):
+            return None
+        data={}
+        data['event'] = event
+        return data
+    except Exception as err:
+        logging.error(err)
+        return None
+
+def get_one_year_events(year:int, user:User) -> list:
+    try:
+        events = CEvent.get_all_year_events(year, user)
+        result = []
+        for event in events:
+            result.append(event.shortjson())
+        return result
+    except Exception as err:
+        logging.error(err)
+        return []

@@ -1,14 +1,41 @@
 class CalendarData{
     static object = undefined;
 
-    constructor(id=undefined, link=undefined, containerControls=undefined, containerCalendar=undefined){
+    constructor(id=undefined, link=undefined, containerControls=undefined, containerCalendar=undefined, 
+        curdatesetup=undefined, eventslink=undefined, curdatelink=undefined){
         this._id = id;
         this._submitlink = link;
+        this._eventsLink = eventslink;
+        this._updateCurDateLink = curdatelink;
         this._containerControls = containerControls;
         this._containerCalendar = containerCalendar;
+        this._curDateSetup = curdatesetup;
+        this._currentDate = undefined;
         this._months = [];
         this._weekdays = [];
         this._yearTables = {};
+        this._events = {};
+        this._redirect = false;
+        var res = /(\d+)(-(\d+))?(-(\d+))?/.exec(window.location.hash);
+        if ((res != null) && (res != undefined) && (res[1]!==undefined)){
+            var day = res[5];
+            if (day === undefined){
+                day = 1;
+            }
+            else{
+                day = parseInt(day);
+            }
+            var month = res[3];
+            if (month === undefined){
+                month = 1;
+            }
+            else{
+                month = parseInt(month);
+            }
+            var year = parseInt(res[1]);
+            this._currentDate = [day, month, year];
+            this._redirect = true;
+        }
     }
 
     get ID(){
@@ -51,13 +78,58 @@ class CalendarData{
 
     get submitLink(){
         if (this._submitlink === undefined){
-            return window.location.href+'/general';
+            return window.location.pathname + '/general';
         }
         return this._submitlink;
     }
 
+    get Editable(){
+        if (this._editable === undefined){
+            return false;
+        }
+        return this._editable;
+    }
+
+    get UpdateCurDateLink(){
+        if (this._updateCurDateLink === undefined){
+            return window.location.pathname + '/date/update';
+        }
+        return this._updateCurDateLink;
+    }
+
+    get DateHash(){
+        var date = this.currentDate;
+        return date[2].toString() + '-' + date[1].toString() + '-' + date[0].toString(); 
+    }
+
+    get Redirect(){
+        if (this._redirect === undefined){
+            return false;
+        }
+        return this._redirect;
+    }
+
+    getEventsLink(year){
+        if (this._eventsLink !== undefined){
+            return this._eventsLink.replace('<year>', year.toString());
+        }
+        if (window.location.pathname.endsWith('/')){
+            return window.location.pathname + 'events/' + year.toString(); 
+        }
+        return window.location.pathname + '/events/' + year.toString(); 
+    }
+
+    getMonth(monthnumber){
+        if(this._months.length > monthnumber){
+            return this._months[monthnumber-1];
+        }
+        else{
+            return undefined;
+        }
+    }
+    
     setCurrentDate(day, month, year){
-        this._currentDate = [day, month, year];
+        this._currentDate = this.FixDate([day, month, year]);
         this.CurDateForm;
     }
 
@@ -92,7 +164,8 @@ class CalendarData{
     }
 
     static fromDictionary(dict, link=undefined){
-        return new CalendarData(dict['id'], dict['firstyear'], link);
+        result = new CalendarData(undefined, undefined, link);
+        result.updateDataDictionary(dict);
     }
 
     get jsonData(){
@@ -108,8 +181,21 @@ class CalendarData{
         this._id = dict['id'];
         this._firstyear = dict['firstyear'];
         this._daysInYear = dict['dpy'];
-        this.updateDataDictionaryMonths(dict['months']);
-        this.updateDataDictionaryWeekDays(dict['week']['days']);
+        this._editable = dict['editable'];
+        
+        if (('curday' in dict) && ('curmonth' in dict) && ('curyear' in dict)){
+            if (this._currentDate === undefined){
+                this._currentDate = [dict['curday'], dict['curmonth'], dict['curyear']];
+            }
+        }
+        if ('months' in dict){
+            this.updateDataDictionaryMonths(dict['months']);
+        }
+        if ('week' in dict){
+            if ('days' in dict['week']){
+                this.updateDataDictionaryWeekDays(dict['week']['days']);
+            }
+        }
     }
 
     updateDataDictionaryWeekDays(list){
@@ -154,11 +240,76 @@ class CalendarData{
             function(data, status){
                 document.calData.updateDataDictionary(data['calendar']);
                 document.calData.fillContainers();
+            },
+            function(data, status){
+                console.log(data);
+            },
+            false,
+            this
+        );
+    }
+
+    parseEventsForYear(events){
+        for(var i=0; i<events.length; ++i){
+            var event = CalendarEvent.fromDictionary(events[i]);
+            if (!(event.Year in this._events)){
+                this._events[event.Year] = {};
             }
-        )
+            if (!(event.Month in this._events[event.Year])){
+                this._events[event.Year][event.Month] = {};
+            }
+            if (!(event.Day in this._events[event.Year][event.Month])){
+                this._events[event.Year][event.Month][event.Day] = [];
+            }
+            this._events[event.Year][event.Month][event.Day].push(event);
+        }
+    }
+
+    getEventsForYear(year){
+        if (year in this._events){
+            return this._events[year];
+        }
+        this._loading = true;
+        this._events[year] = {};
+        sendGetAjax(this.getEventsLink(year), undefined, function(data, status){
+            this.parseEventsForYear(data['events']);
+            this._loading = false;
+        },
+        function(data, status){
+            console.log(data);
+            this._loading = false;
+        }, false, this);
+        return this._events[year];
+    }
+
+    UpdateCurrentDate(day, month, year){
+        var date = this.FixDate([day, month, year]);
+        var data = {
+            'currentday': date[0],
+            'currentmonth': date[1],
+            'currentyear': date[2],
+            'targetid':this.ID,
+            'action':'changed' 
+        };
+        this.ChangeCurDateForm.day.value = date[0];
+        this.ChangeCurDateForm.month.value = date[1];
+        this.ChangeCurDateForm.year.value = date[2];
+        sendPostAjax(this.UpdateCurDateLink, data, function(data, status){
+            this.ChangeCurDateForm.submButton.classList.remove('alert');
+            this.ChangeCurDateForm.submButton.classList.add('success');
+        },
+        function(data, status){
+            this.ChangeCurDateForm.submButton.classList.add('alert');
+            this.ChangeCurDateForm.submButton.classList.remove('success');
+            console.log(data);
+        }, true, this);
     }
 
     createViewForOneMonth(date, firstday){
+        var events = {};
+        if (date[1] in this._events[date[2]]){
+            events = this._events[date[2]][date[1]];
+        }
         var wrapper = document.createElement('div');
         wrapper.classList.add('calendar-wrapper');
         var header = document.createElement('h4');
@@ -166,6 +317,11 @@ class CalendarData{
         montha.id= date[2].toString() + '-' + date[1].toString();
         montha.href= '#' + date[2].toString() + '-' + date[1].toString();
         montha.innerText = this._months[date[1]-1].Name+' '+date[2].toString();
+        if (this.Redirect){
+            if ((date[2] == this.currentDate[2]) && (date[1] == this.currentDate[1])){
+                this._redirectTarget = montha;
+            }
+        }
         header.appendChild(montha);
         wrapper.appendChild(header);
         var calendarList = document.createElement('ol');
@@ -179,10 +335,16 @@ class CalendarData{
         }
         for(var i=0; i<this._months[date[1]-1].NumberOfDays; i++){
             var day = document.createElement('li');
+            day.classList.add('calendar-day');
             var daya = document.createElement('a');
             daya.id= date[2].toString() + '-' + date[1].toString() + '-' + (i+1).toString();
             day.innerText = (i+1).toString();
             day.appendChild(daya);
+            if ((i+1) in events){
+                for (var j=0; j<events[i+1].length; j++){
+                    day.appendChild(events[i+1][j].EventLinkElement);
+                }
+            }
             if (i==0){
                 day.style.gridColumnStart = firstday.DayNumber;
             }
@@ -202,6 +364,7 @@ class CalendarData{
             this._currentTable.classList.remove('is-hidden');
             return this._currentTable;
         }
+        this.getEventsForYear(date[2]);
         var result = document.createElement('div');
         for(var i=1; i<=this._months.length; i++){
             var tmp = [1, i, date[2]];
@@ -250,8 +413,9 @@ class CalendarData{
             submitButton.innerText = 'Go to date';
             submitButton.onclick = function(){
                 document.calData.setCurrentDate(document.calData._curDateForm.day.value, 
-                    document.calData._curDateForm.month.value, document.calData._curDateForm.year.value);
+                document.calData._curDateForm.month.value, document.calData._curDateForm.year.value);
                 document.calData.fillContainers();
+                window.location.hash = document.calData.DateHash;
                 return false;
             };
             form.appendChild(submitButton);
@@ -263,7 +427,57 @@ class CalendarData{
         return this._curDateForm;
     }
 
-    get Controls(){
+    get ChangeCurDateForm(){
+        if (this._changeCurDate===undefined){
+            var form = document.createElement('form');
+            form.classList.add('calendar-controller-form');
+            var dayInput = document.createElement('input');
+            dayInput.type = 'number';
+            form.appendChild(dayInput);
+            form.day = dayInput;
+            var span = document.createElement('span');
+            span.innerText = '—';
+            form.appendChild(span);
+
+            var monthInput = document.createElement('select');
+            for (var i=0; i<this._months.length; i++){
+                var monthOption = document.createElement('option');
+                monthOption.value = this._months[i].MonthNumber;
+                monthOption.data = this._months[i];
+                monthOption.innerText = this._months[i].Name;
+                monthInput.appendChild(monthOption);
+            }
+            form.appendChild(monthInput);
+            form.month = monthInput;
+            var span = document.createElement('span');
+            span.innerText = '—';
+            form.appendChild(span);
+
+            var yearInput = document.createElement('input');
+            yearInput.type = 'number';
+            form.appendChild(yearInput);
+            form.year = yearInput;
+            this._changeCurDate = form;
+
+            var submitButton = document.createElement('button');
+            submitButton.classList.add('button', 'round');
+            submitButton.innerText = 'Update current date';
+            submitButton.onclick = function(){
+                document.calData.UpdateCurrentDate(document.calData._changeCurDate.day.value, 
+                document.calData._changeCurDate.month.value, document.calData._changeCurDate.year.value);
+                return false;
+            };
+            form.appendChild(submitButton);
+            form.submButton = submitButton;
+            var date = this.currentDate;
+            this._changeCurDate.day.value = date[0];
+            this._changeCurDate.month.value = date[1];
+            this._changeCurDate.year.value = date[2];
+        }
+        return this._changeCurDate;
+    }
+
+    get ControlsCurDate(){
         if (this._controlsWrapper !== undefined){
             return this._controlsWrapper;
         }
@@ -302,7 +516,92 @@ class CalendarData{
 
 
         this._controlsWrapper = wrapper;
-        this._containerControls.appendChild(wrapper);
+        return wrapper;
+    }
+
+    FixMonth(date){
+        if (date.length<3){
+            return undefined;
+        }
+        if (this._months.length<1){
+            return date;
+        }
+        if (date[1]<=0){
+            date[2] -= 1;
+            date[1] = this._months.length + date[1];
+            return this.FixMonth(date);
+        }
+        if (date[1] > this._months.length){
+            date[2] += 1;
+            date[1] = date[1] - this._months.length;
+            return this.FixMonth(date);
+        }
+        return date;
+    }
+
+    FixDate(date){
+        if (date.length<3)
+            return undefined;
+        if (this._months.length<1){
+            return date;
+        }
+        if (date[0]<=0){
+            date[1] -= 1;
+            date = this.FixMonth(date);
+            date[0] += this._months[date[1]-1].NumberOfDays;
+            return this.FixDate(date);
+        }
+        date = this.FixMonth(date);
+        if (date[0]>this._months[date[1]-1].NumberOfDays){
+            date[1] += 1;
+            date = this.FixMonth(date);
+            date[0] = date[0] - this._months[date[1]-1].NumberOfDays;
+            return this.FixDate(date);
+        }
+        return date;
+    }
+
+    get ControlsChangeCurDate(){
+        if (this._controlsChangeDateWrapper !== undefined){
+            return this._controlsChangeDateWrapper;
+        }
+        var wrapper = document.createElement('div');
+        wrapper.classList.add('row');
+        var leftpart = document.createElement('div');
+        leftpart.classList.add('column', 'centered-element');
+        var prevday = document.createElement('a');
+        prevday.classList.add('button', 'round');
+        prevday.innerText = 'Change to previous day';
+        prevday.onclick = function(){
+            var date = document.calData.FixDate([parseInt(document.calData.ChangeCurDateForm.day.value) - 1, 
+                parseInt(document.calData.ChangeCurDateForm.month.value),
+                parseInt(document.calData.ChangeCurDateForm.year.value)]);
+            document.calData.UpdateCurrentDate(date[0], date[1], date[2]);
+        }
+        leftpart.appendChild(prevday);
+        wrapper.appendChild(leftpart);
+
+        var middlepart = document.createElement('div');
+        middlepart.classList.add('column', 'centered-element');
+        middlepart.appendChild(this.ChangeCurDateForm);
+        wrapper.appendChild(middlepart);
+
+        var rightpart = document.createElement('div');
+        rightpart.classList.add('column', 'centered-element');
+        var nextday = document.createElement('a');
+        nextday.innerText = 'Change to next day';
+        nextday.classList.add('button', 'round');
+        nextday.onclick = function(){
+            var date = document.calData.FixDate([parseInt(document.calData.ChangeCurDateForm.day.value) + 1, 
+                parseInt(document.calData.ChangeCurDateForm.month.value),
+                parseInt(document.calData.ChangeCurDateForm.year.value)]);
+            document.calData.UpdateCurrentDate(date[0], date[1], date[2]);
+        }
+        rightpart.appendChild(nextday);
+        wrapper.appendChild(rightpart);
+
+
+        this._controlsChangeDateWrapper = wrapper;
         return wrapper;
     }
 
@@ -311,7 +610,19 @@ class CalendarData{
             this.MonthTables;
         }
         if (this._containerControls !== undefined){
-            this.Controls;
+            this._containerControls.appendChild(this.ControlsCurDate);
+        }
+        if (this._curDateSetup !== undefined){
+            if (this.Editable){
+                this._curDateSetup.appendChild(this.ControlsChangeCurDate);
+            }
+        }
+        if (this.Redirect){
+            if (this._redirectTarget !== undefined){
+                this._redirectTarget.scrollIntoView();
+                this._redirectTarget = undefined;
+                this._redirect = false;
+            }
         }
     }
 }
@@ -398,7 +709,7 @@ class CalendarWeekDay{
 
     get submitLink(){
         if (this._submitlink === undefined){
-            return window.location.href+'/weekday';
+            return window.location.pathname+'/weekday';
         }
         return this._submitlink;
     }

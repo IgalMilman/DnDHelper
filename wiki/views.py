@@ -139,8 +139,6 @@ def wikiPageFile(request, wikipageuuid, filename):
     if filecontent is None:
         return HttpResponseNotFound("File was not found")
     response = HttpResponse(filecontent, content_type=guess_type(filename)[0])
-    #response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
-    #response['X-Sendfile'] = smart_str(filename)
     return response
 
 

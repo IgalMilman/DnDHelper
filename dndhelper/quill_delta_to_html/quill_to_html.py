@@ -1,5 +1,6 @@
 from html import escape
 
+from django.urls import reverse
 
 QUILL_REPLACE_INLINE = [{'quill':'script', 'value': 'super', 'htmls':'<sup{}>', 'htmle':'</sup>'},
 {'quill':'script', 'value': 'sub', 'htmls':'<sub{}>', 'htmle':'</sub>'},
@@ -20,6 +21,10 @@ QUILL_CLASSES = [{'quill':'size', 'value': True, 'class_base':'ql-size-',},
 
 true = True
 
+def escapeHTMLUnsafe(text:str):
+    result = escape(text)
+    return result
+
 def read_next_operations(operation):
     text = operation['insert'].split("\n")
     result = []
@@ -27,7 +32,7 @@ def read_next_operations(operation):
         op = {}
         if 'attributes' in operation:
             op['attributes'] = operation['attributes']
-        op['insert'] = escape(text[i])
+        op['insert'] = escapeHTMLUnsafe(text[i])
         if (op['insert']!=""):
             result.append(op)
         if 'attributes' in operation:
@@ -37,7 +42,20 @@ def read_next_operations(operation):
     del result[-1]
     return result
 
+def build_link(linkdict:dict)->str:
+    try:
+        if linkdict is str:
+            return linkdict
+        return reverse(linkdict['name'], kwargs=linkdict['kwargs'])
+    except Exception:
+        return ''
+
+
 def get_image_source(source:str, files_link:str=None)->str:
+    if isinstance(source, dict):
+        res = build_link(source)
+        if res != '':
+            return res
     if files_link is None:
         return source
     if source.startswith('data:image'):
@@ -65,13 +83,13 @@ def expand_delta(delta, files_link=None):
                         except:
                             pass
                     else:
-                        operation['insert']=escape(operation['insert'])
+                        operation['insert']=escapeHTMLUnsafe(operation['insert'])
                     temp.append(operation)
             else:
-                operation['insert']=escape(operation['insert'])
+                operation['insert']=escapeHTMLUnsafe(operation['insert'])
                 temp.append(operation)
         else:
-            operation['insert']=escape(operation['insert'])
+            operation['insert']=escapeHTMLUnsafe(operation['insert'])
             temp.append(operation)
     result = []
     text_container = []
@@ -276,7 +294,7 @@ def parse_text_attributes(text, attributes, old_attributes={}):
         begin = "<span " + attribs + ">"
         end = "</span>"
     if 'link' in attributes and attributes['link']!='' and ('link' not in old_attributes or attributes['link']!=old_attributes['link']):
-        result = '<a href="' + attributes['link'] + '" target="_blank">' + result
+        result = '<a href="' + build_link(attributes['link']) + '">' + result
     if 'link' in attributes and attributes['link']!='':
         end_of_line = "</a>"
     return attributes, begin + result + end, end_of_line

@@ -2,24 +2,24 @@ import logging
 from datetime import datetime
 
 import pytz
-from customcalendar.models import calendarsettings
+from customcalendar.models.calendarsettings import CCalendar 
 from django import forms
 
 
 class CurDateForm(forms.ModelForm):
     class Meta:
-        model = calendarsettings.CCalendar
+        model = CCalendar
         fields = ('currentday', 'currentmonth', 'currentyear', )
 
 def CurDateFormParser(request):
-    if not calendarsettings.CCalendar.canedit(request.user):
+    if not CCalendar.canedit(request.user):
         return {'status': 'failed', 'message': 'No permissions to edit'}
     if (request.method != 'POST') or not ('action' in request.POST):
         return {'status': 'failed', 'message': 'Wrong request.'}
     if (request.POST['action']=='changed'):
         if('targetid' in request.POST):
             try:
-                curcalendar=calendarsettings.CCalendar.objects.get(id=request.POST['targetid'])
+                curcalendar=CCalendar.objects.get(id=request.POST['targetid'])
             except Exception as e:
                 logging.error(e)
             if curcalendar is not None:

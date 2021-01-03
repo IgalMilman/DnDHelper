@@ -20,7 +20,6 @@ def loadfile(file)->str:
 
 def ImportDataFormParse(request) -> HttpResponse:
     data={}
-    print(request.POST)
     if (request.method == 'POST') and ('action' in request.POST):
         if (request.POST['action']=='import'):
             form = ImportDataForm(request.POST, request.FILES)

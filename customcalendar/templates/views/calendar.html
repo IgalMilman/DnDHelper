@@ -2,7 +2,9 @@
 <link rel="stylesheet" href="{% static 'css/calendar/calendar.css' %}{{ URL_ADD_TO_STATIC_FILES }}">
 {% endblock %}{% block extra_javascript %}
 <script src="{% static 'js/base/ajax.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'js/permissions.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
 <script src="{% static 'js/calendar/calendar.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'js/calendar/calendar_event.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
 {% endblock %}
 {% block body %}
 <div id='cur-date-setup'>
@@ -10,11 +12,17 @@
 <div id='calendar-controllers' class='columns small-12 medium-12 large-12 container-padded'>
 </div>
 <div id='calendar-block' class='calendar-body'>
+{% if create_events %}
+<div class="centered-element"><a href="{% url 'calendar_event_form_page' %}" class="button round centered">Create new event</a></div>
+{% endif %}
 </div>
 <script>
     document.calData=new CalendarData(undefined, "{% url 'calendar_settings_general' %}", 
         document.getElementById('calendar-controllers'),
-        document.getElementById('calendar-block'));
+        document.getElementById('calendar-block'),
+        document.getElementById('cur-date-setup'),
+        undefined, 
+        "{% url 'calendar_date_update' %}");
     document.calData.updateFromAjax("{% url 'calendar_settings_general' %}");
 </script>
 <script>
@@ -26,10 +34,10 @@ document.sticky = document.header.offsetTop;
 function makeControlsSticky() {
     if (window.pageYOffset > document.sticky) {
         document.header.classList.add("calendar-sticky");
-    } 
+    }  
     else {
         document.header.classList.remove("calendar-sticky");
     }
-}*/
+}// */
 </script>
 {% endblock %}

@@ -3,6 +3,7 @@ from datamanagement.accessibility import \
 from django.conf import settings
 from django.shortcuts import reverse
 from wiki.accessibility import is_module_accessible as wiki_accessible
+from customcalendar.accessibility import is_module_accessible as calendar_accessible
 
 
 def global_settings(request):
@@ -20,6 +21,7 @@ def global_settings(request):
         'MENU_ITEMS': [{ 'label': 'Homepage', 'link': reverse('homepage'), 'accessible': True}, 
 { 'label': 'Login', 'link': reverse('login'), 'accessible': not request.user.is_authenticated}, 
 { 'label': 'Wiki', 'link': reverse('wiki_homepage'), 'accessible': wiki_accessible(request.user)}, 
+{ 'label': 'Calendar', 'link': reverse('calendar_homepage'), 'accessible': calendar_accessible(request.user)}, 
 { 'label': 'Data', 'link': reverse('datamanagement_homepage'), 'accessible': datamanagement_accessible(request.user)}, 
 ],
     }

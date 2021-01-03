@@ -12,7 +12,6 @@ from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
-from dndhelper import sendemail as emailsending
 from dndhelper.widget import quill
 from permissions.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
 
@@ -37,7 +36,7 @@ class WikiSection(models.Model):
     def save(self, *args, **kwargs):
         folder = self.get_files_folder()
         if folder is not None:
-            self.text = quill.save_images_from_quill(self.text, folder)
+            self.text = quill.save_images_from_quill(self.text, folder, self.get_files_link())
         super(WikiSection, self).save(*args, **kwargs)
 
     def createtime(self):

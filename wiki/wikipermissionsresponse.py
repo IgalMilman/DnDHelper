@@ -23,7 +23,7 @@ def get_sections(request:HttpRequest, wikipage: WikiPage) -> list:
     if targetid == 'all':
         result = wikipage.allpermissionable(request.user)
         if len(result)==0:
-            return None
+            return []
         else:
             return result 
     else:
