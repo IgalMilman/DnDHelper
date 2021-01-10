@@ -16,10 +16,25 @@
     border-right: 1px;
     border-top: 1px;
     border-bottom: 1px;
-    border-style:ridge;
+    border-style: solid;
     border-color: #000;
     border-collapse: collapse;
     border-radius: 1px;
+}
+
+.calendar-day-today{
+    border-left: 5px;
+    border-right: 5px;
+    border-top: 5px;
+    border-bottom: 5px;
+    border-style: solid;
+    border-collapse: collapse;
+    border-color: rgb(185, 108, 7);
+    border-radius: 2px;
+}
+
+.calendar-day p, .calendar-day-today p{
+    line-height: 100%;
 }
 
 .calendar-daynames{

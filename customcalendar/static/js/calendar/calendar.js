@@ -109,6 +109,13 @@ class CalendarData{
         return this._redirect;
     }
 
+    get Today(){
+        if (this._todayDate === undefined){
+            return [1, 1, this.firstYear];
+        }
+        return this._todayDate;
+    }
+
     getEventsLink(year){
         if (this._eventsLink !== undefined){
             return this._eventsLink.replace('<year>', year.toString());
@@ -187,6 +194,7 @@ class CalendarData{
             if (this._currentDate === undefined){
                 this._currentDate = [dict['curday'], dict['curmonth'], dict['curyear']];
             }
+            this._todayDate = [dict['curday'], dict['curmonth'], dict['curyear']]
         }
         if ('months' in dict){
             this.updateDataDictionaryMonths(dict['months']);
@@ -307,6 +315,13 @@ class CalendarData{
 
     createViewForOneMonth(date, firstday){
         var events = {};
+        var today = this.Today;
+        if ((today[1] == date[1]) && (today[2] == date[2])){
+            today = today[0]-1;
+        }
+        else{
+            today = undefined;
+        }
         if (date[1] in this._events[date[2]]){
             events = this._events[date[2]][date[1]];
         }
@@ -335,7 +350,11 @@ class CalendarData{
         }
         for(var i=0; i<this._months[date[1]-1].NumberOfDays; i++){
             var day = document.createElement('li');
-            day.classList.add('calendar-day');
+            if (today == i){
+                day.classList.add('calendar-day-today');
+            } else{
+                day.classList.add('calendar-day');
+            }
             var daya = document.createElement('a');
             daya.id= date[2].toString() + '-' + date[1].toString() + '-' + (i+1).toString();
             day.innerText = (i+1).toString();
