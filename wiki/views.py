@@ -11,10 +11,10 @@ from django.shortcuts import redirect, render, reverse
 from django.utils.encoding import smart_str
 from dndhelper import views as main_views
 
-from wiki import (modelgetters, wikiimportfile, wikipageform,
-                  wikipermissionsresponse, wikisectionform)
-from wiki.wikipage import WikiPage
-from wiki.wikisection import WikiSection
+from wiki import modelgetters, wikiimportfile, wikipermissionsresponse
+from wiki.forms import wikipageform, wikisectionform
+from wiki.models.wikipage import WikiPage
+from wiki.models.wikisection import WikiSection
 
 
 @login_required( login_url = 'login' )
@@ -34,7 +34,7 @@ def wikiPageOpen(request, wikipageuuid):
     data['built'] = datetime.now().strftime("%H:%M:%S")
     data['needdatatables'] = True
     data['needquillinput'] = True
-    return render(request, 'views/wikipage.html', data, content_type='text/html')
+    return render(request, 'wiki/views/wikipage.html', data, content_type='text/html')
 
 @login_required( login_url = 'login' )
 def wikiPageForm(request):    
@@ -68,7 +68,7 @@ def wikiHomePage(request):
     data['built'] = datetime.now().strftime("%H:%M:%S")
     data['needdatatables'] = True
     data['needquillinput'] = False
-    return render(request, 'views/allwiki.html', data, content_type='text/html')
+    return render(request, 'wiki/views/allwiki.html', data, content_type='text/html')
 
 @login_required( login_url = 'login' )
 def wikiPermissionsAjaxRequestHandle(request, wikipageuuid):

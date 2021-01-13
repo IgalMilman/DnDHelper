@@ -7,12 +7,13 @@ import pytz
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
-from dndhelper.widget import quill
-from wiki import wikipage, wikipageform
-from wiki.permissionpage import PermissionPage
-from wiki.permissionsection import PermissionSection
-from wiki.wikipage import Keywords, WikiPage
-from wiki.wikisection import WikiSection
+from utils.widget import quill
+from wiki.forms import wikipageform
+from wiki.models import wikipage, wikisection
+from wiki.models.permissionpage import PermissionPage
+from wiki.models.permissionsection import PermissionSection
+from wiki.models.wikipage import Keywords, WikiPage
+from wiki.models.wikisection import WikiSection
 
 
 def render_mock(request, template, data, content_type='test'):
@@ -363,6 +364,13 @@ class WikiPageFormTestCase(TestCase):
         except:
             wiki=None
         self.assertIsNone(wiki)
+
+    def test_wiki_page_form_delete_request_fail_wrong_action(self):
+        post = {'action':'qwertyu', 'targetid':self.wikiPages[0].unid}
+        method = 'POST'
+        request = req(method=method, user=self.firstUser, post=post)
+        result = wikipageform.WikiArticleFormParse(request)
+        self.assertEqual(result, self.wikimainpagelink)
 
     def test_wiki_page_form_delete_request_fail_no_access(self):
         post = {'action':'delete', 'targetid':self.wikiPages[0].unid}

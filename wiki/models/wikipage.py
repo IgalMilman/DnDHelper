@@ -12,8 +12,8 @@ from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
-from dndhelper.widget import quill
-from permissions.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
+from utils.widget import quill
+from permissions.models.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
 
 
 
@@ -289,7 +289,7 @@ class WikiPage(models.Model):
             sections = []
             if 'sec' in jsonobject:
                 try:
-                    from wiki.wikisection import WikiSection
+                    from wiki.models.wikisection import WikiSection
                     for sec in jsonobject['sec']:
                         sections.append(WikiSection.fromjson(sec, result, commit=commit))
                 except Exception:
@@ -297,7 +297,7 @@ class WikiPage(models.Model):
             perms = []
             if 'perm' in jsonobject:
                 try:
-                    from wiki.permissionpage import PermissionPage
+                    from wiki.models.permissionpage import PermissionPage
                     for perm in jsonobject['perm']:
                         perms.append(PermissionPage.fromjson(perm, result, commit=commit))
                 except Exception:

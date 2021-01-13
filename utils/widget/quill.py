@@ -9,11 +9,11 @@ from mimetypes import guess_extension, guess_type
 from django import forms, template
 from django.db import models
 from django.urls import resolve, reverse
-from dndhelper.quill_delta_to_html import quill_to_html
+from utils.quill_delta_to_html import quill_to_html
 
 
 class QuillWidget(forms.Textarea):
-    template_name = 'forms/widget/quill.html'
+    template_name = 'utils/forms/widget/quill.html'
 
     def __init__(self, attrs=None):
         self.quillobject = None

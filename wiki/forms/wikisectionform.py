@@ -8,9 +8,10 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from dndhelper import views as main_views
-from dndhelper.widget import form_switch, quill
+from utils.widget import form_switch, quill
 
-from wiki import wikipage, wikisection
+from wiki.models.wikipage import WikiPage
+from wiki.models.wikisection import WikiSection
 
 
 class WikiSectionForm(forms.ModelForm):
@@ -20,7 +21,7 @@ class WikiSectionForm(forms.ModelForm):
     
 
     class Meta:
-        model = wikisection.WikiSection
+        model = WikiSection
         fields = ('title', 'pageorder', 'commonknowledge', 'text', )
 
     def save(self, commit=True):
@@ -63,7 +64,7 @@ def WikiSectionFormCreate(request, curpage):
         elif (request.POST['action']=='change'):
             if('targetid' in request.POST):
                 try:
-                    cursection=wikisection.WikiSection.objects.get(unid=request.POST['targetid'])
+                    cursection=WikiSection.objects.get(unid=request.POST['targetid'])
                 except Exception:
                     return None
                 if not cursection.editable(request.user):
@@ -81,7 +82,7 @@ def WikiSectionFormCreate(request, curpage):
         elif (request.POST['action']=='changed'):
             if('targetid' in request.POST):
                 try:
-                    cursection=wikisection.WikiSection.objects.get(unid=request.POST['targetid'])
+                    cursection=WikiSection.objects.get(unid=request.POST['targetid'])
                 except Exception:
                     return None
                 if not cursection.editable(request.user):
@@ -105,7 +106,7 @@ def WikiSectionFormCreate(request, curpage):
         elif (request.POST['action']=='delete'):
             if('targetid' in request.POST):
                 try:
-                    cursection=wikisection.WikiSection.objects.get(unid=request.POST['targetid'])
+                    cursection=WikiSection.objects.get(unid=request.POST['targetid'])
                 except Exception:
                     return None
                 if not cursection.editable(request.user):
@@ -131,7 +132,7 @@ def WikiSectionFormCreate(request, curpage):
 
 def WikiSectionFormParse(request, wikipageuuid):
     try:
-        curpage = wikipage.WikiPage.objects.get(unid=wikipageuuid)
+        curpage = WikiPage.objects.get(unid=wikipageuuid)
     except Exception as err:
         return redirect(reverse('wiki_homepage'))
     data = WikiSectionFormCreate(request, curpage)

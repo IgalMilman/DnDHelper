@@ -2,7 +2,7 @@ import os
 from django import forms
 
 class ClearFileInput(forms.ClearableFileInput):
-    template_name = 'forms/widget/clear_file_input.html'
+    template_name = 'utils/forms/widget/clear_file_input.html'
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)

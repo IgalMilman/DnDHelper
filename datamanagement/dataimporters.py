@@ -2,7 +2,7 @@ from datetime import datetime
 
 from dateutil import parser
 from django.contrib.auth.models import User
-from wiki import wikipage
+from wiki.models.wikipage import WikiPage
 
 
 def import_all_wikipages(wikipagelist:list, override:bool=True)->list:
@@ -12,7 +12,7 @@ def import_all_wikipages(wikipagelist:list, override:bool=True)->list:
         result = []
         for page in wikipagelist:
             try:
-                p = wikipage.WikiPage.fromjson(page, commit=True, override=override)
+                p = WikiPage.fromjson(page, commit=True, override=override)
                 if p is not None:
                     result.append(p)
             except Exception:

@@ -1,14 +1,19 @@
-from django.test import TestCase
-from wiki import modelgetters
-from wiki.wikipage import WikiPage, Keywords
-from wiki.wikisection import WikiSection
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.urls import reverse
-import uuid, pytz, os
+import os
+import uuid
 from datetime import datetime, timedelta
-from dndhelper.widget import quill
+
 import mock
+import pytz
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.urls import reverse
+from utils.widget import quill
+from wiki import modelgetters
+from wiki.models import wikipage, wikisection
+from wiki.models.wikipage import Keywords, WikiPage
+from wiki.models.wikisection import WikiSection
+
 
 class WikiModelGettersTestCase(TestCase):
     def setUp(self):
@@ -47,7 +52,7 @@ class WikiModelGettersTestCase(TestCase):
         self.assertListEqual(list(modelgetters.form_all_wiki_pages_data(self.secondUser)['wiki_pages']), [])
 
     def test_form_all_wiki_pages_data_failed(self):
-        with mock.patch('wiki.wikipage.WikiPage.objects.all') as failmock:
+        with mock.patch('wiki.models.wikipage.WikiPage.objects.all') as failmock:
             failmock.side_effect = Exception("random error")
             self.assertIsNone(modelgetters.form_all_wiki_pages_data(self.firstUser))
     
@@ -78,6 +83,6 @@ class WikiModelGettersTestCase(TestCase):
         self.assertIsNone(modelgetters.get_one_wiki_page_data(uuid.uuid4(), self.firstUser))
 
     def test_form_get_one_wiki_page_data_fail_error(self):
-        with mock.patch('wiki.wikipage.WikiPage.objects.get') as failmock:
+        with mock.patch('wiki.models.wikipage.WikiPage.objects.get') as failmock:
             failmock.side_effect = Exception("random error")
             self.assertIsNone(modelgetters.get_one_wiki_page_data(self.wikiPages[0].unid, self.firstUser))

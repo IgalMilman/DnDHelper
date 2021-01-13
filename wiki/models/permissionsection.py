@@ -2,7 +2,6 @@ import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote
-import logging
 
 import pytz
 from dateutil import parser
@@ -11,16 +10,13 @@ from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
-from permissions import permissions
+from permissions.models.permissions import Permission
+from utils.usefull_functions import time_now
+from wiki.models import wikisection
 
-from wiki.wikipage import WikiPage
 
-
-def time_now(instance=None):
-    return datetime.now(pytz.utc)
-
-class PermissionPage(permissions.Permission):
-    wikipage = models.ForeignKey(WikiPage, on_delete=models.CASCADE, null=False, blank=False, related_name='permissions')
+class PermissionSection(Permission):
+    section = models.ForeignKey(wikisection.WikiSection, on_delete=models.CASCADE, null=False, blank=False, related_name='permissions')
 
     def json(self) -> dict:
         return {
@@ -28,25 +24,25 @@ class PermissionPage(permissions.Permission):
             'createdon': self.createdon.isoformat(),
             'createdby': self.createdby.get_username() if self.createdby is not None else None,
             'permlevel': self.accesslevel,
-            'wikipage': str(self.wikipage.unid)
+            'section': str(self.section.unid)
         }
 
     @staticmethod
-    def get(user:User, wikipage:WikiPage, currentuser:User):
+    def get(user:User, wikisection:wikisection.WikiSection, currentuser:User):
         try: 
-            if not wikipage.permissionsable(currentuser):
+            if not wikisection.permissionsable(currentuser):
                 return None
-            result = PermissionPage.objects.get(grantedto=user, wikipage = wikipage)
+            result = PermissionSection.objects.get(grantedto=user, section = wikisection)
             if not (result is None):
                 return result
         except Exception:
             pass
-        return PermissionPage(createdby=currentuser, grantedto=user, wikipage=wikipage)
+        return PermissionSection(createdby=currentuser, grantedto=user, section=wikisection)
 
     @staticmethod
-    def fromjson(jsonobj:dict, wikipage:WikiPage, commit:bool=False):
+    def fromjson(jsonobj:dict, section:wikisection.WikiSection, commit:bool=False):
         try: 
-            if wikipage is None:
+            if section is None:
                 return None
             if not 'grantedto' in jsonobj:
                 return None
@@ -59,7 +55,6 @@ class PermissionPage(permissions.Permission):
                 perml = int(jsonobj['permlevel'])
                 grto = User.objects.get(username = jsonobj['grantedto'])
             except Exception as exc:
-                logging.error(exc)
                 return None
             if 'createdby' in jsonobj:
                 try:
@@ -67,7 +62,7 @@ class PermissionPage(permissions.Permission):
                     crby = user
                 except Exception:
                     pass
-            result = PermissionPage.get(grto, wikipage, crby)
+            result = PermissionSection.get(grto, section, crby)
             result.accesslevel = perml
             if commit:
                 result.save()

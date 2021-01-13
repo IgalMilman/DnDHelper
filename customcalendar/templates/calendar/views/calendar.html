@@ -1,10 +1,10 @@
 {% extends "_basewide.html" %}{% load static %} {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/calendar/calendar.css' %}{{ URL_ADD_TO_STATIC_FILES }}">
+<link rel="stylesheet" href="{% static 'calendar/css/calendar.css' %}{{ URL_ADD_TO_STATIC_FILES }}">
 {% endblock %}{% block extra_javascript %}
 <script src="{% static 'js/base/ajax.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
-<script src="{% static 'js/permissions.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
-<script src="{% static 'js/calendar/calendar.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
-<script src="{% static 'js/calendar/calendar_event.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'wiki/js/permissions.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'calendar/js/calendar.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'calendar/js/calendar_event.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
 {% endblock %}
 {% block body %}
 <div id='cur-date-setup'>

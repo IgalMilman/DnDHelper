@@ -1,12 +1,16 @@
-from django.test import TestCase
-from wiki import wikipage
-from wiki.wikipage import WikiPage, Keywords
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.urls import reverse
-import uuid, pytz, os
+import os
+import uuid
 from datetime import datetime
+
 import mock
+import pytz
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.urls import reverse
+from wiki.models import wikipage, wikisection
+from wiki.models.wikipage import Keywords, WikiPage
+
 
 class WikiPageTestCase(TestCase):
     def setUp(self):

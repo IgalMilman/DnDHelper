@@ -1,11 +1,10 @@
-from wiki import wikipage
-from wiki import wikisection
+from wiki.models.wikipage import WikiPage
 import uuid 
 
 def form_all_wiki_pages_data(user):
     try:
         result = []
-        wiki_pages = wikipage.WikiPage.objects.all().order_by('-createdon')
+        wiki_pages = WikiPage.objects.all().order_by('-createdon')
         for wikip in wiki_pages:
             if (wikip.viewable(user)):
                 result.append(wikip)
@@ -15,7 +14,7 @@ def form_all_wiki_pages_data(user):
 
 def get_one_wiki_page_data(wikiuuid, user):
     try:
-        wiki_page = wikipage.WikiPage.objects.get(unid=wikiuuid)
+        wiki_page = WikiPage.objects.get(unid=wikiuuid)
         if (wiki_page is None):
             return None
         if (not wiki_page.viewable(user)):

@@ -4,10 +4,10 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest
 from permissions import permissions_response
 
-from wiki.permissionpage import PermissionPage
-from wiki.permissionsection import PermissionSection
-from wiki.wikipage import WikiPage
-from wiki.wikisection import WikiSection
+from wiki.models.permissionpage import PermissionPage
+from wiki.models.permissionsection import PermissionSection
+from wiki.models.wikipage import WikiPage
+from wiki.models.wikisection import WikiSection
 
 
 def get_sections(request:HttpRequest, wikipage: WikiPage) -> list:

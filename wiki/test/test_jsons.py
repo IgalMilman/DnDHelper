@@ -9,23 +9,16 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
-from dndhelper.widget import quill
+from utils.widget import quill
 from permissions import permissions_response
-from permissions.permissions import (PERMISSION_LEVELS_DICTIONARY,
+from permissions.models.permissions import (PERMISSION_LEVELS_DICTIONARY,
                                      PERMISSION_LEVELS_TUPLES, Permission)
 from wiki import modelgetters, wikipermissionsresponse
-from wiki.permissionpage import PermissionPage
-from wiki.permissionsection import PermissionSection
-from wiki.wikipage import Keywords, WikiPage
-from wiki.wikisection import WikiSection
-
-
-class req:
-    def __init__(self, method='GET', post={}, getdic={}, user=None):
-        self.method = method
-        self.user = user
-        self.POST = post
-        self.GET = getdic
+from wiki.models import wikipage, wikisection
+from wiki.models.permissionpage import PermissionPage
+from wiki.models.permissionsection import PermissionSection
+from wiki.models.wikipage import Keywords, WikiPage
+from wiki.models.wikisection import WikiSection
 
 
 class WikiJsonTesting(TestCase):

@@ -19,10 +19,10 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/zf/dt-1.10.18/datatables.min.css"/>
     {% endif %}
     {% if needquillinput %}
-    <link rel="stylesheet" href="{% static 'css/quill/quill.core.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
-    <link rel="stylesheet" href="{% static 'css/quill/quill.snow.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
-    <link rel="stylesheet" href="{% static 'css/quill/quill.snow.div.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
-    <link rel="stylesheet" href="{% static 'css/quill/quill.addition.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
+    <link rel="stylesheet" href="{% static 'utils/css/quill/quill.core.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
+    <link rel="stylesheet" href="{% static 'utils/css/quill/quill.snow.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
+    <link rel="stylesheet" href="{% static 'utils/css/quill/quill.snow.div.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
+    <link rel="stylesheet" href="{% static 'utils/css/quill/quill.addition.css' %}{{ URL_ADD_TO_STATIC_FILES }}"/>
     {% endif %}
 
     <!-- Include all compiled plugins (below), or include individual files as needed -->
@@ -45,7 +45,7 @@
     <script type="text/javascript" src="https://cdn.datatables.net/v/zf/dt-1.10.18/datatables.min.js"></script>
     {% endif %}
     {% if needquillinput %}
-    <script src="{% static 'js/quill/quill.min.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+    <script src="{% static 'utils/js/quill/quill.min.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
     {% endif %}
     {% block extra_css %}{% endblock %}{% block extra_javascript %}{% endblock %}
 </head>
@@ -76,10 +76,6 @@
                             {% for item in MENU_ITEMS %}
                             {% if item.accessible %}<li><a href="{{ item.link }}">{{ item.label }}</a></li>{% endif %}
                             {% endfor %}
-                            {% comment %} <li><a href="{% url ''%}"></a></li>
-                            <li><a href="{% url 'wiki_homepage'%}">Wiki</a></li>
-                            <li><a href="{% url 'datamanagement_homepage'%}">Data</a></li> {% endcomment %}
-                            {% comment %} <li><a href="{% url ''%}"></a></li> {% endcomment %}
                             </ul>
                         </div>
                     </div>

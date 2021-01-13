@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from dndhelper import settings
 
-from wiki import wikipage
+from wiki.models.wikipage import WikiPage
 
 
 class WikiImportForm(forms.Form):
@@ -20,13 +20,13 @@ def loadfile(file)->str:
 
 def WikiArticleFormParse(request) -> HttpResponse:
     data={}
-    if not wikipage.WikiPage.cancreate(request.user):
+    if not WikiPage.cancreate(request.user):
         return redirect(reverse('wiki_homepage'))
     if (request.method == 'POST') and ('action' in request.POST):
         if (request.POST['action']=='import'):
             form = WikiImportForm(request.POST, request.FILES)
             if form.is_valid():
-                model = wikipage.WikiPage.fromjson(json.loads(loadfile(request.FILES['file'])), commit = True)
+                model = WikiPage.fromjson(json.loads(loadfile(request.FILES['file'])), commit = True)
                 if model is not None:
                     messages.success(request, 'Page created successfully')
                     return redirect(model['page'].get_link())

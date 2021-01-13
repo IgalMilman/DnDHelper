@@ -16,7 +16,7 @@
             <a id="wikisection-id-change-permission-{{ section.unid }}" class="button round inlineblock" onclick="var p = new PermissionPopup('{% url 'wiki_page_perm' wikipageuuid=wiki_page.unid %}', '{{ section.unid }}');p.Activate();">Change Permissions</a>
     {% endif %}</div>
     </div>
-    {% include "forms/widget/maybequill.html" with obj=section %}<br>
+    {% include "utils/forms/widget/maybequill.html" with obj=section %}<br>
     {% comment %} {% if comment.files %}
     {% for onefile in comment.files.all %} {% include "views/components/oneuploadedfile.html" with onefile=onefile %} {% endfor %}
     {% endif %} {% endcomment %}

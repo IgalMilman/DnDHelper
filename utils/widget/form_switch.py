@@ -1,7 +1,7 @@
 from django import forms
 
 class SwitchOnOffWidget(forms.CheckboxInput):
-    template_name = 'forms/widget/switch.html'
+    template_name = 'utils/forms/widget/switch.html'
 
     def __init__(self, attrs=None, check_test=None):
         super(SwitchOnOffWidget, self).__init__(attrs=attrs, check_test=check_test)

@@ -8,8 +8,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from dndhelper import settings
 from dndhelper import views as main_views
-from dndhelper.widget import form_switch
-from wiki import wikipage
+from utils.widget import form_switch
 
 from datamanagement import datagetters
 

@@ -12,12 +12,10 @@ from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
-from dndhelper.widget import quill
-from permissions.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
+from utils.widget import quill
+from permissions.models.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
+from utils.usefull_functions import time_now 
 
-
-def time_now(instance=None):
-    return datetime.now(pytz.utc)
 
 EVENT_TYPES_DICTIONARY = {"History event":0, "Holiday":10, "Party event": 20, "Personal event": 30}
 EVENT_TYPES_NUMBER_DICTIONARY = {0:"History event", 10:"Holiday", 20:"Party event", 30:"Personal event"}

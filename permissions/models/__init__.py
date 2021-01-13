@@ -1,3 +1,3 @@
 from django.db import models
-from permissions import permissions
+from permissions.models import permissions
 # Create your models here.

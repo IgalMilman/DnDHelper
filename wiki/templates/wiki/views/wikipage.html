@@ -1,13 +1,13 @@
 {% extends "_basewide.html" %}{% load static %} {% block extra_css %}{% endblock %}{% block extra_javascript %}
 <script src="{% static 'js/base/ajax.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
-<script src="{% static 'js/permissions.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
+<script src="{% static 'wiki/js/permissions.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
 <script src="{% static 'js/base/dialogs.js' %}{{ URL_ADD_TO_STATIC_FILES }}"></script>
 {% endblock %}
 {% block body %}
 <div class="post-bordered">
 <div class="row">
     <div class="columns text-left"><a id="{{ wiki_page.anchor_id }}"></a><h3>{{ wiki_page.title }}</h3>
-    {% include "forms/widget/maybequill.html" with obj=wiki_page %}
+    {% include "utils/forms/widget/maybequill.html" with obj=wiki_page %}
 <br>
 <ol>
 {% for section in wiki_page_sections %} 
@@ -55,10 +55,10 @@
 {% endif %}
 {% endif %}
 {% else %}
-{% include "views/components/wiki_pagesection.html" with section=section %}
+{% include "wiki/views/components/wiki_pagesection.html" with section=section %}
 {% endif %}
 {% else %}
-{% include "views/components/wiki_pagesection.html" with section=section %} 
+{% include "wiki/views/components/wiki_pagesection.html" with section=section %} 
 {% endif %}
 
 {% endfor %}

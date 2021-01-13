@@ -8,14 +8,15 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
-from dndhelper.widget import quill
+from utils.widget import quill
 from permissions import permissions_response
-from permissions.permissions import (PERMISSION_LEVELS_DICTIONARY,
+from permissions.models.permissions import (PERMISSION_LEVELS_DICTIONARY,
                                      PERMISSION_LEVELS_TUPLES, Permission)
 from wiki import modelgetters, wikipermissionsresponse
-from wiki.permissionsection import PermissionSection
-from wiki.wikipage import Keywords, WikiPage
-from wiki.wikisection import WikiSection
+from wiki.models import wikipage, wikisection
+from wiki.models.permissionsection import PermissionSection
+from wiki.models.wikipage import Keywords, WikiPage
+from wiki.models.wikisection import WikiSection
 
 
 class req:
@@ -129,7 +130,7 @@ class WikiPermissionsResponseTesting(TestCase):
     def test_get_sections_all_failed_permissions(self):
         request = req('GET', None, {'target': 'all'}, self.thirdUser)
         sections = wikipermissionsresponse.get_sections(request, self.wikiPages[0])
-        self.assertIsNone(sections)
+        self.assertListEqual(sections, [])
 
     def test_get_sections_one_failed_permissions(self):
         request = req('GET', None, {'target': str(self.wikiSections[0].unid)}, self.thirdUser)
@@ -170,7 +171,7 @@ class WikiPermissionsResponseTesting(TestCase):
     def test_post_sections_all_failed_permissions(self):
         request = req('POST', {'targetid': 'all'}, None, self.thirdUser)
         sections = wikipermissionsresponse.get_sections(request, self.wikiPages[0])
-        self.assertIsNone(sections)
+        self.assertListEqual(sections, [])
 
     def test_post_sections_one_failed_permissions(self):
         request = req('POST', {'targetid': str(self.wikiSections[0].unid)}, None, self.thirdUser)

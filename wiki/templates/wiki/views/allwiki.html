@@ -9,7 +9,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for article in wiki_pages %} {% include "views/oneitemrow/wikirow.html" with wikip=article %} {% endfor %}
+        {% for article in wiki_pages %} {% include "wiki/views/oneitemrow/wikirow.html" with wikip=article %} {% endfor %}
     </tbody>
 </table>
 {% if add_wiki_pages %}

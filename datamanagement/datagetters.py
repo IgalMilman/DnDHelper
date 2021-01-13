@@ -1,10 +1,10 @@
-from wiki import wikipage
+from wiki.models.wikipage import WikiPage
 from django.contrib.auth.models import User
 
 def export_all_wiki_pages(user):
     try:
         result = []
-        for page in wikipage.WikiPage.objects.all():
+        for page in WikiPage.objects.all():
             try:
                 result.append(page.json())
             except Exception:

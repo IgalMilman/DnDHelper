@@ -6,16 +6,16 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from dndhelper import settings
 from dndhelper import views as main_views
-from dndhelper.widget import form_switch, quill
+from utils.widget import form_switch, quill
 
-from wiki import wikipage
+from wiki.models.wikipage import WikiPage
 
 
 class WikiPageForm(forms.ModelForm):
     text = quill.QuillField(label="Article text", widget=quill.QuillWidget({'toolbar': {'image': True, 'video': True}}), required=False)
     commonknowledge = form_switch.SwitchOnOffField(label="Is public knowledge?", required=False)
     class Meta:
-        model = wikipage.WikiPage
+        model = WikiPage
         fields = ('title', 'commonknowledge', 'text', )
         # widgets = {
         #     'postedon':  forms.SplitDateTimeWidget
@@ -31,7 +31,7 @@ def WikiArticleFormParse(request):
     data['PAGE_TITLE'] = 'Change posted atricle: ' + settings.SOFTWARE_NAME_SHORT
     if (request.method == 'POST') and ('action' in request.POST):
         if (request.POST['action']=='add'):
-            if not wikipage.WikiPage.cancreate(request.user):
+            if not WikiPage.cancreate(request.user):
                 return redirect(reverse('wiki_homepage'))
             form = WikiPageForm(request.POST)
             if form.is_valid():
@@ -48,7 +48,7 @@ def WikiArticleFormParse(request):
         elif (request.POST['action']=='change'):
             if('targetid' in request.POST):
                 try:
-                    curpost=wikipage.WikiPage.objects.get(unid=request.POST['targetid'])
+                    curpost=WikiPage.objects.get(unid=request.POST['targetid'])
                 except Exception:
                     return redirect(reverse('wiki_homepage'))
                 if not curpost.editable(request.user):
@@ -66,7 +66,7 @@ def WikiArticleFormParse(request):
         elif (request.POST['action']=='changed'):
             if('targetid' in request.POST):
                 try:
-                    curpost=wikipage.WikiPage.objects.get(unid=request.POST['targetid'])
+                    curpost=WikiPage.objects.get(unid=request.POST['targetid'])
                 except Exception:
                     return redirect(reverse('wiki_homepage'))
                 if not curpost.editable(request.user):
@@ -90,7 +90,7 @@ def WikiArticleFormParse(request):
         elif (request.POST['action']=='delete'): 
             if('targetid' in request.POST):
                 try:
-                    curpost=wikipage.WikiPage.objects.get(unid=request.POST['targetid'])
+                    curpost=WikiPage.objects.get(unid=request.POST['targetid'])
                 except Exception:
                     return redirect(reverse('wiki_homepage'))
                 if not curpost.editable(request.user):
@@ -102,7 +102,7 @@ def WikiArticleFormParse(request):
         else:
             return redirect(reverse('wiki_homepage'))
     else:
-        if not wikipage.WikiPage.cancreate(request.user):
+        if not WikiPage.cancreate(request.user):
             return redirect(reverse('wiki_homepage'))
         form = WikiPageForm()
         data['action']='add'

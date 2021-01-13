@@ -12,14 +12,11 @@ from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
-from dndhelper.widget import quill
-from permissions.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
+from permissions.models.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
+from utils.usefull_functions import time_now
+from utils.widget import quill
+from wiki.models.wikipage import WikiPage
 
-from wiki.wikipage import WikiPage
-
-
-def time_now(instance=None):
-    return datetime.now(pytz.utc)
 
 class WikiSection(models.Model):
     unid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -248,7 +245,7 @@ class WikiSection(models.Model):
             perms = []
             if 'perm' in jsonobject:
                 try:
-                    from wiki.permissionsection import PermissionSection
+                    from wiki.models.permissionsection import PermissionSection
                     for perm in jsonobject['perm']:
                         perms.append(PermissionSection.fromjson(perm, result, commit=commit))
                 except Exception:

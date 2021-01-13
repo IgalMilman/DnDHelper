@@ -1,14 +1,18 @@
-from django.test import TestCase
-from wiki import wikisection
-from wiki.wikipage import WikiPage, Keywords
-from wiki.wikisection import WikiSection
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.urls import reverse
-import uuid, pytz, os
+import os
+import uuid
 from datetime import datetime
-from dndhelper.widget import quill
+
 import mock
+import pytz
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import TestCase
+from django.urls import reverse
+from utils.widget import quill
+from wiki.models import wikipage, wikisection
+from wiki.models.wikipage import Keywords, WikiPage
+from wiki.models.wikisection import WikiSection
+
 
 class WikiSectionTestCase(TestCase):
     def setUp(self):

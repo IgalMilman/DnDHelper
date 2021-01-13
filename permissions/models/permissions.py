@@ -1,14 +1,15 @@
-from django.db import models
+import os
+import uuid
 from datetime import datetime, timedelta, timezone
-from django.conf import settings
-from django.urls import reverse
-import pytz, uuid, os
 from urllib.parse import quote, unquote
-from django.core.files.storage import DefaultStorage
-from django.contrib.auth.models import User
 
-def time_now(instance=None):
-    return datetime.now(pytz.utc)
+import pytz
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.files.storage import DefaultStorage
+from django.db import models
+from django.urls import reverse
+from utils.usefull_functions import time_now
 
 PERMISSION_LEVELS_DICTIONARY = {"Denied":0, "View Only":10, "View":10, "Permissions": 20, "Change Permissions": 20, "Edit": 30}
 PERMISSION_LEVELS_TUPLES = ((0, "Denied"), (10, "View Only"), (20, "Change Permissions"), (30, "Edit"))

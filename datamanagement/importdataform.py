@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from dndhelper import settings
-from dndhelper.widget import form_switch
+from utils.widget import form_switch
 from datamanagement import dataimporters
 
 class ImportDataForm(forms.Form):

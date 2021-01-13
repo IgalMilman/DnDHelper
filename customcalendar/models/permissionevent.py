@@ -1,25 +1,22 @@
+import logging
 import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote
-import logging
 
 import pytz
+from customcalendar.models.calendarevent import CEvent
 from dateutil import parser
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
-from permissions import permissions
+from permissions.models.permissions import Permission
+from utils.usefull_functions import time_now
 
-from customcalendar.models.calendarevent import CEvent
 
-
-def time_now(instance=None):
-    return datetime.now(pytz.utc)
-
-class PermissionCEvent(permissions.Permission):
+class PermissionCEvent(Permission):
     event = models.ForeignKey(CEvent, on_delete=models.CASCADE, null=False, blank=False, related_name='permissions')
 
     def json(self) -> dict:
