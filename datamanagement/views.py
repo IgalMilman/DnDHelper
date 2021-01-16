@@ -22,7 +22,7 @@ def dataHomePage(request):
     data['PAGE_TITLE'] = 'Data management: ' + settings.SOFTWARE_NAME
     data['built'] = datetime.now().strftime("%H:%M:%S")
     data['needdatatables'] = False
-    return render(request, 'views/datamanagement_homepage.html', data, content_type='text/html')
+    return render(request, 'datamanagement/views/datamanagement_homepage.html', data, content_type='text/html')
     
 
 @login_required( login_url = 'login' )

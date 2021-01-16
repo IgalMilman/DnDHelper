@@ -8,10 +8,11 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
-from utils.widget import quill
 from permissions import permissions_response
 from permissions.models.permissions import (PERMISSION_LEVELS_DICTIONARY,
-                                     PERMISSION_LEVELS_TUPLES, Permission)
+                                            PERMISSION_LEVELS_TUPLES,
+                                            Permission)
+from utils.widget import quill
 from wiki import modelgetters, wikipermissionsresponse
 from wiki.models import wikipage, wikisection
 from wiki.models.permissionsection import PermissionSection

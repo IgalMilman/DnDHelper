@@ -3,10 +3,10 @@ from datetime import datetime
 
 import pytz
 from django import forms
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from dndhelper import settings
 from utils.widget import form_switch
 
 from datamanagement import datagetters

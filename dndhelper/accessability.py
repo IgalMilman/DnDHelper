@@ -1,10 +1,12 @@
 
 from crum import get_current_user
+from customcalendar.accessibility import \
+    is_module_accessible as calendar_accessible
 from datamanagement.accessibility import \
     is_module_accessible as datamanagement_accessible
 from django.shortcuts import reverse
 from wiki.accessibility import is_module_accessible as wiki_accessible
-from customcalendar.accessibility import is_module_accessible as calendar_accessible
+
 
 def is_module_accessible(user=None)->bool:
     if user is None:

@@ -1,5 +1,7 @@
+import uuid
+
 from wiki.models.wikipage import WikiPage
-import uuid 
+
 
 def form_all_wiki_pages_data(user):
     try:

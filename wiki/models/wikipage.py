@@ -12,9 +12,9 @@ from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
+from permissions.models.permissions import (PERMISSION_LEVELS_DICTIONARY,
+                                            Permission)
 from utils.widget import quill
-from permissions.models.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
-
 
 
 class Keywords(models.Model):

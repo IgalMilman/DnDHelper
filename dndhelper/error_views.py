@@ -1,6 +1,8 @@
-from django.shortcuts import render
-from django.conf import settings
 import datetime
+
+from django.conf import settings
+from django.shortcuts import render
+
 
 def notfound(request, data={}):
     data['PAGE_TITLE'] = 'Not found error: '+settings.SOFTWARE_NAME

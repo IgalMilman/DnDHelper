@@ -2,13 +2,15 @@ import json
 from datetime import datetime
 
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from dndhelper import settings
 from utils.widget import form_switch
+
 from datamanagement import dataimporters
+
 
 class ImportDataForm(forms.Form):
     override = form_switch.SwitchOnOffField(label="Override data", required=False, initial=False)

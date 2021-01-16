@@ -2,11 +2,10 @@ from datetime import datetime
 
 import pytz
 from django import forms
+from django.conf import settings
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from dndhelper import settings
 from utils.widget import form_switch, quill
-
 from wiki.models.wikipage import WikiPage
 
 
@@ -16,9 +15,7 @@ class WikiPageForm(forms.ModelForm):
     class Meta:
         model = WikiPage
         fields = ('title', 'commonknowledge', 'text', )
-        # widgets = {
-        #     'postedon':  forms.SplitDateTimeWidget
-        # }
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

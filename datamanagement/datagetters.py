@@ -1,5 +1,6 @@
-from wiki.models.wikipage import WikiPage
 from django.contrib.auth.models import User
+from wiki.models.wikipage import WikiPage
+
 
 def export_all_wiki_pages(user):
     try:

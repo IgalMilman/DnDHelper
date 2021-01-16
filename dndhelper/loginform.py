@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.shortcuts import reverse
 from django.contrib.auth import forms as auth_forms
+from django.shortcuts import reverse
 
 
 class MyAuthLoginForm(auth_forms.AuthenticationForm):

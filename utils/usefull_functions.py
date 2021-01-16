@@ -3,6 +3,7 @@ from datetime import datetime
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import pytz
+from django.conf import settings
 from django.shortcuts import render
 
 

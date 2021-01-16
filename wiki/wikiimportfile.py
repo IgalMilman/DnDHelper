@@ -2,11 +2,11 @@ import json
 from datetime import datetime
 
 from django import forms
+from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, redirect
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
-from dndhelper import settings
 
 from wiki.models.wikipage import WikiPage
 

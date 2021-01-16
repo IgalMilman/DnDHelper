@@ -12,10 +12,10 @@ from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
+from permissions.models.permissions import (PERMISSION_LEVELS_DICTIONARY,
+                                            Permission)
+from utils.usefull_functions import time_now
 from utils.widget import quill
-from permissions.models.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
-from utils.usefull_functions import time_now 
-
 
 EVENT_TYPES_DICTIONARY = {"History event":0, "Holiday":10, "Party event": 20, "Personal event": 30}
 EVENT_TYPES_NUMBER_DICTIONARY = {0:"History event", 10:"Holiday", 20:"Party event", 30:"Personal event"}
@@ -277,7 +277,8 @@ class CEvent(models.Model):
             perms = []
             if 'perm' in jsonobject:
                 try:
-                    from customcalendar.models.permissionevent import PermissionCEvent
+                    from customcalendar.models.permissionevent import \
+                        PermissionCEvent
                     for perm in jsonobject['perm']:
                         perms.append(PermissionCEvent.fromjson(perm, result, commit=commit))
                 except Exception:

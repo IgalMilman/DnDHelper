@@ -1,5 +1,6 @@
 from django import forms
 
+
 class SwitchOnOffWidget(forms.CheckboxInput):
     template_name = 'utils/forms/widget/switch.html'
 

@@ -12,7 +12,8 @@ from django.contrib.auth.models import User
 from django.core.files.storage import DefaultStorage
 from django.db import models
 from django.urls import reverse
-from permissions.models.permissions import PERMISSION_LEVELS_DICTIONARY, Permission
+from permissions.models.permissions import (PERMISSION_LEVELS_DICTIONARY,
+                                            Permission)
 from utils.usefull_functions import time_now
 from utils.widget import quill
 from wiki.models.wikipage import WikiPage

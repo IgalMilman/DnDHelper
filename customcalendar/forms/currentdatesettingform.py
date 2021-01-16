@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 import pytz
-from customcalendar.models.calendarsettings import CCalendar 
+from customcalendar.models.calendarsettings import CCalendar
 from django import forms
 
 

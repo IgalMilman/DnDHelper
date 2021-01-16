@@ -4,9 +4,9 @@ from datetime import datetime
 import pytz
 from customcalendar.models import calendarsettings
 from django import forms
+from django.conf import settings
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from dndhelper import settings
 from utils.widget import form_switch, quill
 
 

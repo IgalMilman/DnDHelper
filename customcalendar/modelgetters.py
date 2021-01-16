@@ -1,10 +1,12 @@
 import logging
 
 from crum import get_current_user
+from django.contrib.auth.models import User
+
+from customcalendar.models.calendarevent import CEvent
 from customcalendar.models.calendarsettings import (CCalendar, CMonth, CWeek,
                                                     CWeekDay)
-from customcalendar.models.calendarevent import CEvent
-from django.contrib.auth.models import User
+
 
 def get_calendar(calid:int=None)->CCalendar:
     cal = None

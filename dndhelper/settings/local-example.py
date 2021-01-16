@@ -1,6 +1,7 @@
 # Make this unique, and don't share it with anybody.
 
-import os,sys
+import os
+import sys
 
 AUTO_LOGOUT_DELAY = 3600 # Default logout delay
 try:

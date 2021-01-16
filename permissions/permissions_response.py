@@ -3,7 +3,8 @@ import json
 from django.contrib.auth.models import User
 
 from permissions.models.permissions import (PERMISSION_LEVELS_DICTIONARY,
-                                     PERMISSION_LEVELS_TUPLES, Permission)
+                                            PERMISSION_LEVELS_TUPLES,
+                                            Permission)
 
 
 def get_permission_level_data() -> list:

@@ -1,9 +1,10 @@
+from customcalendar.accessibility import \
+    is_module_accessible as calendar_accessible
 from datamanagement.accessibility import \
     is_module_accessible as datamanagement_accessible
 from django.conf import settings
 from django.shortcuts import reverse
 from wiki.accessibility import is_module_accessible as wiki_accessible
-from customcalendar.accessibility import is_module_accessible as calendar_accessible
 
 
 def global_settings(request):
