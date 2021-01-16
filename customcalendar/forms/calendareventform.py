@@ -7,7 +7,6 @@ from django import forms
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from dndhelper import settings
-from dndhelper import views as main_views
 from utils.widget import form_switch, quill
 
 

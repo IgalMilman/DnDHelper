@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render, reverse
 from django.utils.encoding import smart_str
-from dndhelper import views as main_views
+from utils.usefull_functions import initRequest
 
 from wiki import modelgetters, wikiimportfile, wikipermissionsresponse
 from wiki.forms import wikipageform, wikisectionform
@@ -19,7 +19,7 @@ from wiki.models.wikisection import WikiSection
 
 @login_required( login_url = 'login' )
 def wikiPageOpen(request, wikipageuuid):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     datawikipage = modelgetters.get_one_wiki_page_data(wikipageuuid, request.user)
@@ -38,28 +38,28 @@ def wikiPageOpen(request, wikipageuuid):
 
 @login_required( login_url = 'login' )
 def wikiPageForm(request):    
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     return wikipageform.WikiArticleFormParse(request)
 
 @login_required( login_url = 'login' )
 def wikiAddSectionToWikiPageFormSubmit(request, wikipageuuid):    
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     return wikisectionform.WikiSectionFormParse(request, wikipageuuid)
 
 @login_required( login_url = 'login' )
 def wikiChangeSectionToWikiPageFormSubmit(request, wikipageuuid):    
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     return wikisectionform.WikiSectionFormParse(request, wikipageuuid)
 
 @login_required( login_url = 'login' )
 def wikiHomePage(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     data = modelgetters.form_all_wiki_pages_data(request.user)         
@@ -72,7 +72,7 @@ def wikiHomePage(request):
 
 @login_required( login_url = 'login' )
 def wikiPermissionsAjaxRequestHandle(request, wikipageuuid):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     wikipage = wikipermissionsresponse.get_wiki_page(request, wikipageuuid)
@@ -85,7 +85,7 @@ def wikiPermissionsAjaxRequestHandle(request, wikipageuuid):
 
 @login_required( login_url = 'login' )
 def wikiExportOnePage(request, wikipageuuid):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     wikipage = wikipermissionsresponse.get_wiki_page(request, wikipageuuid)
@@ -98,14 +98,14 @@ def wikiExportOnePage(request, wikipageuuid):
 
 @login_required( login_url = 'login' )
 def wikiImportOnePage(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     return wikiimportfile.WikiArticleFormParse(request)
 
 @login_required( login_url = 'login' )
 def wikiExportAllPages(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     all_wiki_json = modelgetters.export_all_wiki_pages(request.user)
@@ -115,7 +115,7 @@ def wikiExportAllPages(request):
 
 @login_required( login_url = 'login' )
 def wikiImportAllPages(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     all_wiki_json = modelgetters.export_all_wiki_pages(request.user)
@@ -126,7 +126,7 @@ def wikiImportAllPages(request):
 
 @login_required( login_url = 'login' )
 def wikiPageFile(request, wikipageuuid, filename):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     try:
@@ -144,7 +144,7 @@ def wikiPageFile(request, wikipageuuid, filename):
 
 @login_required( login_url = 'login' )
 def wikiSectionFile(request, wikipageuuid, wikisectionuuid, filename):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     try:

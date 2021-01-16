@@ -9,23 +9,18 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render, reverse
 from django.utils.encoding import smart_str
-from dndhelper import views as main_views
+from utils.usefull_functions import (generalJSONAnswerFailed,
+                                     generalJSONAnswerSuccess, initRequest)
 
 from customcalendar import modelgetters, permissionresponse
-from customcalendar.forms import calendarsettingsform,calendareventform,currentdatesettingform
+from customcalendar.forms import (calendareventform, calendarsettingsform,
+                                  currentdatesettingform)
 from customcalendar.models.calendarevent import CEvent
 
 
-# Create your views here.
-def generalJSONAnswerSuccess():
-    return {'status': 'success'}
-
-def generalJSONAnswerFailed():
-    return {'status': 'failed'}
-
 @login_required( login_url = 'login' )
 def calendarHomePage(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     data = {}
@@ -38,7 +33,7 @@ def calendarHomePage(request):
 
 @login_required( login_url = 'login' )
 def calendarAllEventsPage(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     data = modelgetters.get_all_events(request.user)
@@ -51,7 +46,7 @@ def calendarAllEventsPage(request):
 
 @login_required( login_url = 'login' )
 def calendarEventPage(request, ceventuuid):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     data = modelgetters.get_one_event_page_data(ceventuuid, request.user)
@@ -65,7 +60,7 @@ def calendarEventPage(request, ceventuuid):
 
 @login_required( login_url = 'login' )
 def calendarEventPageAPI(request, ceventuuid):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     data = modelgetters.get_one_event_page_data_api(ceventuuid, request.user)
@@ -76,7 +71,7 @@ def calendarEventPageAPI(request, ceventuuid):
 
 @login_required( login_url = 'login' )
 def calendarAllEventsAPI(request, year):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     datalist = modelgetters.get_one_year_events(year, request.user)
@@ -88,7 +83,7 @@ def calendarAllEventsAPI(request, year):
 
 @login_required( login_url = 'login' )
 def calendarEventPageFile(request, ceventuuid, filename):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     try:
@@ -105,14 +100,14 @@ def calendarEventPageFile(request, ceventuuid, filename):
 
 @login_required( login_url = 'login' )
 def calendarEventPageForm(request):    
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     return calendareventform.CEventFormParse(request)
 
 @login_required(login_url='login')
 def calendarSettingsPage(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     data = {}
@@ -125,7 +120,7 @@ def calendarSettingsPage(request):
 
 @login_required( login_url = 'login' )
 def calendarSettingsGeneralAjaxRequest(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     result = generalJSONAnswerFailed()
@@ -147,7 +142,7 @@ def calendarSettingsGeneralAjaxRequest(request):
 
 @login_required( login_url = 'login' )
 def calendarUpdateDateAjaxRequest(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     result = generalJSONAnswerFailed()
@@ -166,7 +161,7 @@ def calendarUpdateDateAjaxRequest(request):
 
 @login_required( login_url = 'login' )
 def calendarSettingsMonthAjaxRequest(request, monthid=None):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     result = generalJSONAnswerFailed()
@@ -188,7 +183,7 @@ def calendarSettingsMonthAjaxRequest(request, monthid=None):
 
 @login_required( login_url = 'login' )
 def calendarSettingsWeekAjaxRequest(request):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     result = generalJSONAnswerFailed()
@@ -208,7 +203,7 @@ def calendarSettingsWeekAjaxRequest(request):
 
 @login_required( login_url = 'login' )
 def calendarSettingsWeekDayAjaxRequest(request, weekdayid=None):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     result = generalJSONAnswerFailed()
@@ -230,7 +225,7 @@ def calendarSettingsWeekDayAjaxRequest(request, weekdayid=None):
 
 @login_required( login_url = 'login' )
 def eventPermissionsAjaxRequestHandle(request, ceventuuid):
-    valid, response = main_views.initRequest(request)
+    valid, response = initRequest(request)
     if not valid:
         return response
     event = permissionresponse.get_event(request, ceventuuid)

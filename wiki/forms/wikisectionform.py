@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from dndhelper import views as main_views
 from utils.widget import form_switch, quill
 
 from wiki.models.wikipage import WikiPage
@@ -17,7 +16,6 @@ from wiki.models.wikisection import WikiSection
 class WikiSectionForm(forms.ModelForm):
     text = quill.QuillField(label='Text', widget=quill.QuillWidget({'toolbar': {'image': True, 'video': True}}))
     commonknowledge = form_switch.SwitchOnOffField(label="Is public knowledge?", required=False)
-    #file_field = forms.FileField(label="Attach files", widget=forms.ClearableFileInput(attrs={'multiple': True}), required=False)
     
 
     class Meta:
@@ -33,8 +31,6 @@ class WikiSectionForm(forms.ModelForm):
         if 'instance' in kwargs:            
             self.fields['text'].widget.quillobject = kwargs['instance']
 
-    # def get_files(self, request):
-    #     return request.FILES.getlist('file_field')
 
 def WikiSectionFormCreate(request, curpage):
     data={}
@@ -52,9 +48,6 @@ def WikiSectionFormCreate(request, curpage):
                 model.createdby = request.user
                 model.updatedby = request.user
                 model.save()
-                # files = form.get_files(request)
-                # for f in files:
-                #     uploaded_file.save_file_comment(model, f)
                 return None
             else:
                 data['action']='add'
