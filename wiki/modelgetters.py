@@ -15,8 +15,6 @@ def form_all_wiki_pages_data(user):
 def get_one_wiki_page_data(wikiuuid, user):
     try:
         wiki_page = WikiPage.objects.get(unid=wikiuuid)
-        if (wiki_page is None):
-            return None
         if (not wiki_page.viewable(user)):
             return None
         data={}
