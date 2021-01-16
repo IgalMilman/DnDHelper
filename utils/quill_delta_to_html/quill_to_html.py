@@ -44,7 +44,7 @@ def read_next_operations(operation):
 
 def build_link(linkdict:dict)->str:
     try:
-        if linkdict is str:
+        if isinstance(linkdict, str):
             return linkdict
         return reverse(linkdict['name'], kwargs=linkdict['kwargs'])
     except Exception:

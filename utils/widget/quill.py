@@ -5,7 +5,9 @@ import os
 import random
 import string
 from mimetypes import guess_extension, guess_type
+from urllib.parse import urlparse
 
+from crum import get_current_request
 from django import forms, template
 from django.db import models
 from django.urls import resolve, reverse
@@ -153,6 +155,8 @@ def save_images_from_quill(inputstr, filepath:str, link:str='')->dict:
     quilldict = get_quill_value(inputstr)
     if not isinstance(quilldict, dict):
         return inputstr
+    request = get_current_request()
+    cur_host = request.META['HTTP_HOST']
     for operation in quilldict['ops']:
         if 'insert' in operation:
             if isinstance(operation['insert'], dict):
@@ -174,11 +178,15 @@ def save_images_from_quill(inputstr, filepath:str, link:str='')->dict:
         if 'attributes' in operation:
             if 'link' in operation['attributes']:
                 try:
-                    tmp = resolve(operation['attributes']['link'])
-                    kwargs = {}
-                    for par in tmp.kwargs:
-                        kwargs[par] = str(tmp.kwargs[par])
-                    operation['attributes']['link'] = {'kwargs': kwargs, 'name': tmp.url_name}
+                    tmplink = operation['attributes']['link']
+                    urlparts = urlparse(tmplink)
+                    if (urlparts.netloc == '') or (urlparts.netloc == cur_host):
+                        urlparts = urlparts._replace(scheme='', netloc='')
+                        tmp = resolve(urlparts.geturl())
+                        kwargs = {}
+                        for par in tmp.kwargs:
+                            kwargs[par] = str(tmp.kwargs[par])
+                        operation['attributes']['link'] = {'kwargs': kwargs, 'name': tmp.url_name}
                 except Exception as err:
                     logging.error(err)
     if type(quilldict) == type(inputstr):
